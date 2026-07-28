@@ -85,9 +85,12 @@ docker compose up -d
 docker ps   # confirm all three containers are Up
 ```
 
-📸 *[Screenshot placeholder: `docker ps` showing all three containers running]*
+📸 *[Screenshot: `docker ps` showing all three containers running]*
+<img width="1269" height="525" alt="Logstash-Elasticsearch-Kibana" src="https://github.com/user-attachments/assets/d65eac04-f3e2-416d-a6eb-02edb2c22400" />
 
-📸 *[Screenshot placeholder: initial Kibana login page over plain HTTP]*
+
+📸 *[Screenshot: initial Kibana login page over plain HTTP]*
+<img width="1279" height="737" alt="HTTP login page" src="https://github.com/user-attachments/assets/cd9bb3d5-6625-4f5d-ac21-4a1c87967156" />
 
 ---
 
@@ -103,6 +106,8 @@ curl http://localhost:9200/_cluster/health
 ```
 
 📸 *[Screenshot placeholder: 401 response confirming security is enforced]*
+<img width="1273" height="779" alt="Docker Compose Health check" src="https://github.com/user-attachments/assets/e5855ae3-0621-471b-ab72-e42327bd16c9" />
+
 
 ### 2.2 Generating a Certificate Authority and Certificates
 
@@ -129,6 +134,8 @@ docker exec elasticsearch bin/elasticsearch-certutil cert \
 Certificates are then copied out of the container onto the host (`docker cp`) into `elasticsearch/certs/`, so they persist and can be mounted into every service — container `/tmp` storage does **not** survive a container recreate.
 
 📸 *[Screenshot placeholder: certificate files listed in `elasticsearch/certs/`]*
+<img width="1265" height="772" alt="Creating CA HTTPS Certificates" src="https://github.com/user-attachments/assets/5402b230-53a9-42b0-a650-ce77725f5e81" />
+
 
 ### 2.3 Enabling HTTPS on Elasticsearch
 
@@ -159,8 +166,11 @@ Two separate things had to be configured — easy to miss one:
 ```
 
 📸 *[Screenshot placeholder: Kibana loading over HTTPS with self-signed cert warning]*
+<img width="1260" height="722" alt="Kibana HTTPS warning" src="https://github.com/user-attachments/assets/527e6442-04ec-472d-826d-8410df411be0" />
+
 
 📸 *[Screenshot placeholder: successful Kibana login over HTTPS]*
+<img width="1267" height="737" alt="Kibana Homepage" src="https://github.com/user-attachments/assets/efa20311-576c-4666-bd4e-cb8695bb88de" />
 
 ---
 
@@ -204,7 +214,7 @@ output {
     ssl_enabled => true
     ssl_certificate_authorities => ["/usr/share/logstash/certs/ca.crt"]
     user => "elastic"
-    password => "changeme"
+    password => "......"
     index => "filebeat-lab-%{+YYYY.MM.dd}"
   }
 }
@@ -214,18 +224,22 @@ output {
 
 In **Stack Management → Data Views**, a data view was created for `filebeat-lab-*` with `@timestamp` as the time field, exposing 61 auto-detected fields from the ingested documents.
 
-📸 *[Screenshot placeholder: Data View creation screen showing matched index]*
+📸 *[Screenshot: Data View creation screen showing matched index]*
+<img width="635" height="381" alt="Filebeat Dataview" src="https://github.com/user-attachments/assets/4ee04da0-092a-4d37-b7a3-a182fb945f79" />
+
+
 
 ---
 
 ## ✅ Verification
 
 ```bash
-curl -k -u elastic:<password> https://localhost:9200/_cat/indices?v
+curl -k -u elastic:<mypassword> https://myhostip:9200/_cat/indices?v
 ```
 Confirms the `filebeat-lab-*` index exists with a non-zero document count.
 
-📸 *[Screenshot placeholder: Kibana Discover showing 500 hits of real log data]*
+📸 *[Screenshot: Kibana Discover showing 500 hits of real log data]*
+<img width="1259" height="484" alt="file beat confirmed" src="https://github.com/user-attachments/assets/c51988c8-2a49-4230-967f-2ca03b3dd92f" />
 
 ---
 
