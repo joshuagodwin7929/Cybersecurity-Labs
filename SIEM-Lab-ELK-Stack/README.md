@@ -105,7 +105,7 @@ curl http://localhost:9200/_cluster/health
 # → 401 security_exception: missing authentication credentials
 ```
 
-📸 *[Screenshot placeholder: 401 response confirming security is enforced]*
+📸 *[Screenshot: 401 response confirming security is enforced]*
 <img width="1273" height="779" alt="Docker Compose Health check" src="https://github.com/user-attachments/assets/e5855ae3-0621-471b-ab72-e42327bd16c9" />
 
 
@@ -133,7 +133,7 @@ docker exec elasticsearch bin/elasticsearch-certutil cert \
 
 Certificates are then copied out of the container onto the host (`docker cp`) into `elasticsearch/certs/`, so they persist and can be mounted into every service — container `/tmp` storage does **not** survive a container recreate.
 
-📸 *[Screenshot placeholder: certificate files listed in `elasticsearch/certs/`]*
+📸 *[Screenshot: certificate files listed in `elasticsearch/certs/`]*
 <img width="1265" height="772" alt="Creating CA HTTPS Certificates" src="https://github.com/user-attachments/assets/5402b230-53a9-42b0-a650-ce77725f5e81" />
 
 
@@ -165,11 +165,11 @@ Two separate things had to be configured — easy to miss one:
 - SERVER_SSL_KEY=/usr/share/kibana/config/certs/kibana.key
 ```
 
-📸 *[Screenshot placeholder: Kibana loading over HTTPS with self-signed cert warning]*
+📸 *[Screenshot: Kibana loading over HTTPS with self-signed cert warning]*
 <img width="1260" height="722" alt="Kibana HTTPS warning" src="https://github.com/user-attachments/assets/527e6442-04ec-472d-826d-8410df411be0" />
 
 
-📸 *[Screenshot placeholder: successful Kibana login over HTTPS]*
+📸 *[Screenshot: successful Kibana login over HTTPS]*
 <img width="1267" height="737" alt="Kibana Homepage" src="https://github.com/user-attachments/assets/efa20311-576c-4666-bd4e-cb8695bb88de" />
 
 ---
