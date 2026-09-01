@@ -88,8 +88,10 @@ Every project is documented around:
 ```text
 Homelabs/
 │
-├── Active-Directory-Homelab/
+├── 01-Active-Directory-Homelab/
 │
-├── SIEM-Lab-ELK-Stack/
+├── 02-SIEM-Lab-ELK-Stack/
+|
+├── 03-Active-Directory-ELK-SIEM-Lab/
 │
 └── README.md
