@@ -66,9 +66,9 @@ Every project is documented around:
 |---|---|
 | Active Directory Homelab | 🟢 Completed |
 | SIEM Lab – ELK Stack | 🟡 In Progress |
-| Network Security Lab | 🔵 Planned |
-| Detection Engineering Lab | 🔵 Planned |
-| Incident Response Lab | 🔵 Planned |
+| Network Security Lab | 🔵 Planned in another repository|
+| Detection Engineering Lab | 🔵 Planned in another repository |
+| Incident Response Lab | 🔵 Planned in another repository |
 
 ---
 
