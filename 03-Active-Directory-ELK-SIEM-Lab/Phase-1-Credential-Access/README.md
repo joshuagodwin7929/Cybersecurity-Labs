@@ -1,7 +1,7 @@
 #  Phase 2 - Active Directory Attack Path Mapping
 
 **Home Lab Series:** Detection Engineering & Offensive Security in a Self-Hosted AD Environment
-**Phase 2 of 5** — *Mapping the Terrain*
+**Phase 2 of 4** — *Mapping the Terrain*
 **Preceded by:** Phase 0 (Visibility Foundation), Phase 1 (Credential Access)
 **Followed by:** Phase 3 (Lateral Movement), Phase 4 (Persistence)
 
