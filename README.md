@@ -10,8 +10,8 @@ I used these homelabs to build practical experience with enterprise security tec
 
 | Project | Focus | Technologies |
 |---|---|---|
-| [Active Directory Homelab](./Active-Directory-Homelab/) | Enterprise identity & Windows administration | AD DS • DNS • DHCP • GPO • AD CS |
-| [SIEM Lab – ELK Stack](./SIEM-Lab-ELK-Stack/) | Security monitoring & log analysis | Elasticsearch • Logstash • Kibana |
+| [01-Active Directory Homelab](./01-Active-Directory-Homelab/) | Enterprise identity & Windows administration | AD DS • DNS • DHCP • GPO • AD CS |
+| [02-SIEM Lab – ELK Stack](./02-SIEM-Lab-ELK-Stack/) | Security monitoring & log analysis | Elasticsearch • Logstash • Kibana |
 
 ---
 
