@@ -1,4 +1,4 @@
-# Active Directory Attack Path Mapping — Phase 2
+#  Phase 2 - Active Directory Attack Path Mapping
 
 **Home Lab Series:** Detection Engineering & Offensive Security in a Self-Hosted AD Environment
 **Phase 2 of 5** — *Mapping the Terrain*
