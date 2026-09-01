@@ -2,7 +2,7 @@
 
 > Hands-on cybersecurity labs focused on Active Directory, SIEM, detection engineering, network security, and incident response.
 
-I use these homelabs to build practical experience with enterprise security technologies and document what I learn along the way.
+I used these homelabs to build practical experience with enterprise security technologies and document what I learn along the way.
 
 ---
 
@@ -12,7 +12,6 @@ I use these homelabs to build practical experience with enterprise security tech
 |---|---|---|
 | [Active Directory Homelab](./Active-Directory-Homelab/) | Enterprise identity & Windows administration | AD DS • DNS • DHCP • GPO • AD CS |
 | [SIEM Lab – ELK Stack](./SIEM-Lab-ELK-Stack/) | Security monitoring & log analysis | Elasticsearch • Logstash • Kibana |
-| Coming Soon | Network Security Lab | Wireshark • Suricata • TCP/IP |
 
 ---
 
