@@ -395,7 +395,7 @@ The goal is not simply to follow tutorials, but to build, troubleshoot, document
 | Project | Description |
 |---|---|
 | [📊 SIEM Lab – ELK Stack](../SIEM-Lab-ELK-Stack/) | Centralized security monitoring and log analysis |
-| [🛡️ Homelabs](../) | View all cybersecurity homelab projects |
+| [🛡️ Cybersecurity-Labs](../) | View all cybersecurity homelab projects |
 
 ---
 
@@ -407,4 +407,4 @@ This Active Directory homelab demonstrates hands-on experience building and mana
 
 ---
 
-[← Back to Homelabs](../)
+[← Back to Cybersecurity-Labs](../)
