@@ -11,7 +11,7 @@
 
 **Simulating the most dangerous Active Directory attack chain and discovering why a SIEM alone couldn't see it.**
 
-[← Phase 3: Lateral Movement](../Phase3) · [Phase 5: Detection Engineering →](../Phase5)
+[← Phase 3: Lateral Movement](../Phase-3-Lateral-Movement) · [Phase 5: Detection Engineering →](../Phase5)
 
 </div>
 
@@ -23,7 +23,7 @@
 
 | Phase | Title | Focus |
 |-------|-------|-------|
-| [Phase 0](../Phase0) | Visibility Foundation | ELK Stack, Sysmon, Winlogbeat |
+| [Phase 0](../Phase-0-Visibility-Foundation) | Visibility Foundation | ELK Stack, Sysmon, Winlogbeat |
 | [Phase 1](../Phase-1-Credential-Access) | Credential Access | LLMNR Poisoning, Kerberoasting, AS-REP Roasting |
 | [Phase 2](../Phase-2-Attack-Path-Mapping) | Attack Path Mapping | BloodHound CE, SharpHound, AD Enumeration |
 | [Phase 3](../Phase-3-Lateral-Movement) | Lateral Movement | GPO Abuse, NetExec, atexec, SYSTEM Execution |
@@ -34,7 +34,7 @@
 
 ## 1. 🏗️ WHAT DID I BUILD?
 
-In Phase 4, I built the final and most dangerous layer of my AD attack simulation — a complete **domain persistence chain** that began with a compromised workstation and ended with forging valid Kerberos authentication tickets using only a cryptographic hash — no passwords, no accounts, no limits.
+In this Phase (Phase 4), I built the final and most dangerous layer of my AD attack simulation — a complete **domain persistence chain** that began with a compromised workstation and ended with forging valid Kerberos authentication tickets using only a cryptographic hash — no passwords, no accounts, no limits.
 
 Specifically, I built and documented:
 
