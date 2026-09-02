@@ -12,7 +12,7 @@
 
 ## 🎯 Project Overview
 
-This project builds the detection layer first, then attacks it — mirroring the real relationship between red and blue teams. It simulates an enterprise domain, instruments it with a self-hosted SIEM, and then runs a full credential-access-to-domain-compromise chain against it, one technique at a time: **log first, attack second, hunt third.**
+This project builds the detection layer first, then attacks it by mirroring the real relationship between red and blue teams. It simulates an enterprise domain, instruments it with a self-hosted SIEM, and then runs a full credential-access-to-domain-compromise chain against it, one technique at a time: **log first, attack second, hunt third.**
 
 Skills developed:
 
