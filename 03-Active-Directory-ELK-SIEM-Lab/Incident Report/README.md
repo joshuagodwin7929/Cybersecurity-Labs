@@ -1,13 +1,14 @@
 ## Incident Report — Simulated Domain Compromise: LLMNR Poisoning to DCSync
 
 
-**Prepared for:** Engineering Manager Briefing
+**Prepared for:** Engineering Manager / Non-Technical Stakeholder Briefing
 
 **Classification:** Internal / Lab Simulation (JOSHUA.LOCAL domain)
 
-**Prepared by:** [OKUNNUWA JOSHUA GODWIN]
+**Prepared by:** OKUNNUWA JOSHUA GODWIN
 
 **Date of Activity:** Phases 1–4, personal AD attack/defense lab
+
 
 ### Executive Summary
 Over a controlled, self-hosted lab exercise, I simulated a full domain
