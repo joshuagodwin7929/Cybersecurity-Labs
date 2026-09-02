@@ -12,16 +12,16 @@ Winlogbeat. Attacks executed from Kali Linux.
 ## Table of Contents
 - [Detection Notes](#detection-notes)
 
-  - [1. LLMNR/NBT-NS Poisoning](Phase-1-Credential-Access/)
-  - [2. Password Spraying](Phase-1-Credential-Access)
-  - [3. Kerberoasting](Phase-1-Credential-Access)
-  - [4. AS-REP Roasting](Phase-1-Credential-Access)
-  - [5. BloodHound/SharpHound AD Enumeration](Phase-2-Attack-Path-Mapping)
-  - [6. Lateral Movement via atexec](Phase-3-Lateral-Movement)
-  - [7. DCSync](Phase-4-DCSync-Golden-Ticket)
-  - [8. Golden Ticket](Phase-4-DCSync-Golden-Ticket)
-- [Kibana Dashboard Build Guide](Phase-5-Detection-Engineering)
-- [Incident Report — Full Attack Chain](#incident-report-Write-Up)
+  - [1. LLMNR/NBT-NS Poisoning](../Phase-1-Credential-Access)
+  - [2. Password Spraying](../Phase-1-Credential-Access)
+  - [3. Kerberoasting](../Phase-1-Credential-Access)
+  - [4. AS-REP Roasting](../Phase-1-Credential-Access)
+  - [5. BloodHound/SharpHound AD Enumeration](../Phase-2-Attack-Path-Mapping)
+  - [6. Lateral Movement via atexec](../Phase-3-Lateral-Movement)
+  - [7. DCSync](../Phase-4-DCSync-Golden-Ticket)
+  - [8. Golden Ticket](../Phase-4-DCSync-Golden-Ticket)
+- [Kibana Dashboard Build Guide](../Phase-5-Detection-Engineering)
+- [Incident Report — Full Attack Chain](../Incident-Report-Write-Up)
 
 ---
 
