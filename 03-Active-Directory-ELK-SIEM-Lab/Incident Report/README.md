@@ -2,8 +2,11 @@
 
 
 **Prepared for:** Engineering Manager Briefing
+
 **Classification:** Internal / Lab Simulation (JOSHUA.LOCAL domain)
+
 **Prepared by:** [OKUNNUWA JOSHUA GODWIN]
+
 **Date of Activity:** Phases 1–4, personal AD attack/defense lab
 
 ### Executive Summary
