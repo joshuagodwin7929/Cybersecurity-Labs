@@ -199,7 +199,7 @@ Both are protocol-level abuses that host-based Sysmon logging is structurally no
 **Okunnuwa Joshua Godwin** | Security Operations | Detection Engineering | Active Directory
 
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-0077B5?style=flat-square&logo=linkedin)](https://www.linkedin.com/in/okunnuwa-joshua-godwin/)
-[![GitHub](https://img.shields.io/badge/GitHub-Portfolio-181717?style=flat-square&logo=github)](https://github.com/joshua7929)
+[![GitHub](https://img.shields.io/badge/GitHub-Portfolio-181717?style=flat-square&logo=github)](https://github.com/joshuagodwin7929)
 
 *This report documents a controlled simulation conducted entirely within a private isolated lab environment. No real systems were targeted.*
 
