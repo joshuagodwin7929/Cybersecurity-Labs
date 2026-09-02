@@ -1,4 +1,4 @@
-# AD Attack & Defense Lab — Phase 5: Detection Engineering & Write-Up
+Phase 5: Detection Engineering & Write-Up
 
 A self-hosted Active Directory attack/defense lab (Sysmon + Winlogbeat + Elastic Stack)
 covering credential access, attack-path mapping, lateral movement, and domain persistence
@@ -12,7 +12,7 @@ Winlogbeat. Attacks executed from Kali Linux.
 ## Table of Contents
 - [Detection Notes](#detection-notes)
 
-  - [1. LLMNR/NBT-NS Poisoning](Phase-1-Credential-Access)
+  - [1. LLMNR/NBT-NS Poisoning](Phase-1-Credential-Access/)
   - [2. Password Spraying](Phase-1-Credential-Access)
   - [3. Kerberoasting](Phase-1-Credential-Access)
   - [4. AS-REP Roasting](Phase-1-Credential-Access)
