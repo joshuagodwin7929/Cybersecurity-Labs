@@ -475,6 +475,8 @@ are detection dependencies, not just operational ones.
 > Defender real-time protection was disabled.
 
 ![lsassy hash extraction](./screenshots/lsassy-administrator-hash.png)
+<img width="538" height="318" alt="Administrator NTLM Hash" src="https://github.com/user-attachments/assets/ad0943ee-2780-4385-8491-5aef34192826" />
+
 
 ---
 
@@ -485,6 +487,8 @@ are detection dependencies, not just operational ones.
 > No interactive DC logon required.
 
 ![DCSync krbtgt output](./screenshots/dcsync-krbtgt-output.png)
+<img width="500" height="158" alt="DCSync" src="https://github.com/user-attachments/assets/988bdd79-d0a8-4552-9607-a858c9207b02" />
+
 
 ---
 
@@ -495,6 +499,7 @@ are detection dependencies, not just operational ones.
 > and all 30+ domain accounts exposed via a single RPC call.
 
 ![lookupsid domain enumeration](./screenshots/lookupsid-domain-sid.png)
+<img width="468" height="382" alt="Doamin SID" src="https://github.com/user-attachments/assets/9aaa1ba3-8aa4-44d5-88be-c712a7549142" />
 
 ---
 
@@ -505,6 +510,7 @@ are detection dependencies, not just operational ones.
 > krbtgt AES256 key. No DC interaction required for forgery.
 
 ![Golden Ticket forge](./screenshots/golden-ticket-forge.png)
+<img width="472" height="262" alt="Golden Ticket Forged" src="https://github.com/user-attachments/assets/a1e8cde2-df29-4a51-be37-b53ca81c234f" />
 
 ---
 
@@ -516,6 +522,7 @@ are detection dependencies, not just operational ones.
 > A forensically valid TGT.
 
 ![describeTicket verified](./screenshots/describe-ticket-output.png)
+<img width="538" height="251" alt="Golden DescribeTicket" src="https://github.com/user-attachments/assets/8d7f650c-aa57-4b21-a545-b15412efcd1f" />
 
 ---
 
@@ -527,16 +534,19 @@ are detection dependencies, not just operational ones.
 > Authentication: Kerberos only. Password: none.
 
 ![DC share access](./screenshots/dc-share-access-golden-ticket.png)
+<img width="539" height="376" alt="Full DC Share Access" src="https://github.com/user-attachments/assets/dded24e1-0295-4b42-9506-6574810d2eba" />
+
 
 ---
 
 ### Screenshot 7 — Kibana: Zero 4662 Events (DCSync Gap)
 
 > Kibana Discover query `event.code: "4662"` returning zero results
-> across the full 24-hour window covering the DCSync attack.
+> across the full 1-hour window covering the DCSync attack.
 > DS Access auditing not configured — confirmed detection gap.
 
 ![DCSync no 4662 events](./screenshots/kibana-no-4662-dcsync.png)
+<img width="642" height="659" alt="No event hit 4662" src="https://github.com/user-attachments/assets/e9ae43d1-8bf4-40f6-8aaa-d92431de21b3" />
 
 ---
 
@@ -549,6 +559,7 @@ are detection dependencies, not just operational ones.
 > `ElevatedToken: %%1842`. No preceding 4768 in the dataset.
 
 ![Golden Ticket 4624 survivor](./screenshots/kibana-4624-golden-ticket-logon.png)
+<img width="640" height="702" alt="event 4624 kerberos" src="https://github.com/user-attachments/assets/a750ec93-8ac2-4586-8d1a-74c845b2459f" />
 
 ---
 
