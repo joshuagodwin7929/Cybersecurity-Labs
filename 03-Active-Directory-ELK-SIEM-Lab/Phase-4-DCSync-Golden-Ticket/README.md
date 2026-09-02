@@ -24,9 +24,9 @@
 | Phase | Title | Focus |
 |-------|-------|-------|
 | [Phase 0](../Phase0) | Visibility Foundation | ELK Stack, Sysmon, Winlogbeat |
-| [Phase 1](../Phase1) | Credential Access | LLMNR Poisoning, Kerberoasting, AS-REP Roasting |
-| [Phase 2](../Phase2) | Attack Path Mapping | BloodHound CE, SharpHound, AD Enumeration |
-| [Phase 3](../Phase3) | Lateral Movement | GPO Abuse, NetExec, atexec, SYSTEM Execution |
+| [Phase 1](../Phase-1-Credential-Access) | Credential Access | LLMNR Poisoning, Kerberoasting, AS-REP Roasting |
+| [Phase 2](../Phase-2-Attack-Path-Mapping) | Attack Path Mapping | BloodHound CE, SharpHound, AD Enumeration |
+| [Phase 3](../Phase-3-Lateral-Movement) | Lateral Movement | GPO Abuse, NetExec, atexec, SYSTEM Execution |
 | **Phase 4** | **Persistence** | **DCSync, Golden Ticket, Detection Gaps** |
 | [Phase 5](../Phase5) | Detection Engineering | KQL Queries, Kibana Dashboard, Incident Report |
 
