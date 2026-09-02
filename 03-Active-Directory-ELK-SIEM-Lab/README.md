@@ -204,6 +204,12 @@ Active-Directory-ELK-SOC-Lab/
 │   ├── README.md
 │   └── screenshots/
 │
+├── Phase-5-Detection-Engineering/
+│   └── README.md
+│   
+├── Phase-6-Incident-Report/
+│   └── README.md
+│
 └── README.md
 ```
 
