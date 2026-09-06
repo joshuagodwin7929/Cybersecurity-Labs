@@ -1,4 +1,4 @@
-# 🔐 Active Directory Home Lab — Phase 4: Persistence via DCSync & Golden Ticket
+# Phase 4: Persistence via DCSync & Golden Ticket
 
 <div align="center">
 
