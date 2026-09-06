@@ -1,4 +1,4 @@
-Phase 5: Detection Engineering & Write-Up
+# Phase 5: Detection Engineering & Write-Up #
 
 A self-hosted Active Directory attack/defense lab (Sysmon + Winlogbeat + Elastic Stack)
 covering credential access, attack-path mapping, lateral movement, and domain persistence
