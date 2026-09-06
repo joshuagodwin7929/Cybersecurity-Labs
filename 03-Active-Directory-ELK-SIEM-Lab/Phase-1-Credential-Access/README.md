@@ -142,14 +142,14 @@ Specifically, I wanted to:
 ### LLMNR/NBT-NS Poisoning
 | Evidence | Description |
 |---|---|
-| ![Responder capture](./screenshots/01-responder-capture.png) | Responder capturing NTLMv2 hashes |
+| ![Responder capture](../screenshots/01-responder-capture.png) | Responder capturing NTLMv2 hashes |
 
 <img width="641" height="381" alt="01-responder-capture-01" src="https://github.com/user-attachments/assets/181402b3-e23b-4eb9-bba8-1d657364a8e3" />
 
 <img width="529" height="384" alt="01-responder-capture-02" src="https://github.com/user-attachments/assets/05321957-eb21-406d-a6ab-a7389062b3e2" />
 
 
-| ![John cracking result](./screenshots/02-john-crack-result.png) | Cracking result: test account cracked, real accounts resisted |
+| ![John cracking result](../screenshots/02-john-crack-result.png) | Cracking result: test account cracked, real accounts resisted |
 
 <img width="535" height="383" alt="02-john-crack-result-01" src="https://github.com/user-attachments/assets/661f4e65-ceee-4547-94f6-7bc933902096" />
 
@@ -159,7 +159,7 @@ Specifically, I wanted to:
 ### Password Spraying
 | Evidence | Description |
 |---|---|
-| ![NetExec spray output](./screenshots/03-netexec-spray.png) | NetExec spray run with zero valid credentials and lockout messages |
+| ![NetExec spray output](../screenshots/03-netexec-spray.png) | NetExec spray run with zero valid credentials and lockout messages |
 
 <img width="607" height="378" alt="03-netexec-spray-01" src="https://github.com/user-attachments/assets/104ae5e3-b9f6-4b88-ae2f-3294583825f4" />
 
@@ -168,12 +168,12 @@ Specifically, I wanted to:
 
 
 
-| ![Kibana 4625 events](./screenshots/04-kibana-4625.png) | Failed logon (4625) events visible in Kibana |
+| ![Kibana 4625 events](../screenshots/04-kibana-4625.png) | Failed logon (4625) events visible in Kibana |
 
 <img width="1280" height="584" alt="04-kibana-4625" src="https://github.com/user-attachments/assets/6c006674-5699-46d3-a9a0-04274cdf0e2d" />
 
 
-| ![auditpol legacy override](./screenshots/05-auditpol-fix.png) | Root cause: legacy audit policy override, before/after fix |
+| ![auditpol legacy override](../screenshots/05-auditpol-fix.png) | Root cause: legacy audit policy override, before/after fix |
 
 <img width="587" height="408" alt="05-auditpol-fix" src="https://github.com/user-attachments/assets/b826162f-94ae-45d2-8135-d30e8abaa315" />
 
@@ -181,17 +181,17 @@ Specifically, I wanted to:
 ### Kerberoasting
 | Evidence | Description |
 |---|---|
-| ![GetUserSPNs ticket request](./screenshots/06-getuserspns.png) | Requesting the Kerberoastable service ticket |
+| ![GetUserSPNs ticket request](../screenshots/06-getuserspns.png) | Requesting the Kerberoastable service ticket |
 
 
 <img width="496" height="376" alt="06-getuserspns" src="https://github.com/user-attachments/assets/5eaaa3a4-282b-4c1c-a262-119e111ec419" />
 
 
-| ![Kibana 4769 RC4 query](./screenshots/07-kibana-4769.png) | Validated hunt query for RC4 ticket encryption |
+| ![Kibana 4769 RC4 query](../screenshots/07-kibana-4769.png) | Validated hunt query for RC4 ticket encryption |
 
 <img width="2556" height="1474" alt="07-kibana-4769" src="https://github.com/user-attachments/assets/f87d2f15-a3a0-4685-802b-90d4d401fc76" />
 
-| ![Crack comparison](./screenshots/08-crack-comparison.png) | Strong vs. weak password crack comparison |
+| ![Crack comparison](../screenshots/08-crack-comparison.png) | Strong vs. weak password crack comparison |
 
 <img width="1076" height="760" alt="08-crack-comparison-01" src="https://github.com/user-attachments/assets/f8a0848d-a752-42ca-8eb9-8c766fea141e" />
 
@@ -202,11 +202,11 @@ Specifically, I wanted to:
 ### AS-REP Roasting
 | Evidence | Description |
 |---|---|
-| ![GetNPUsers hash capture](./screenshots/09-getnpusers.png) | AS-REP hash capture for the pre-auth-disabled account |
+| ![GetNPUsers hash capture](../screenshots/09-getnpusers.png) | AS-REP hash capture for the pre-auth-disabled account |
 
 <img width="1079" height="749" alt="09-getnpusers" src="https://github.com/user-attachments/assets/0a79309c-e8c6-43ca-95ed-3941199c9f61" />
 
-| ![Kibana 4768 PreAuthType query](./screenshots/10-kibana-4768.png) | Validated hunt query on Pre-Authentication Type |
+| ![Kibana 4768 PreAuthType query](../screenshots/10-kibana-4768.png) | Validated hunt query on Pre-Authentication Type |
 
 <img width="1273" height="1118" alt="10-kibana-4768" src="https://github.com/user-attachments/assets/e82a229f-85e5-4663-a871-afa24cb17d6d" />
 
