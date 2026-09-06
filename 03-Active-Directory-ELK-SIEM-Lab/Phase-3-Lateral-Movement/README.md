@@ -149,9 +149,21 @@ The resulting Sysmon Event ID 1 landed **61 milliseconds** after the logon event
 `screenshots/phase3/01-gpo-restricted-groups.png`
 *Restricted Groups configuration granting scoped local admin rights on the target workstation only.*
 
+
+<img width="523" height="401" alt="01-gpo-restricted-groups-01" src="https://github.com/user-attachments/assets/3e5323b3-1f68-431d-8003-e181656085e6" />
+
+
+<img width="502" height="352" alt="01-gpo-restricted-groups-02" src="https://github.com/user-attachments/assets/c55de097-28fa-4cd6-9973-2db39d78cc95" />
+
+
+
 ### Security Filtering Scope
 `screenshots/phase3/02-security-filtering.png`
 *GPO Security Filtering limited to the target computer object, confirming no domain-wide impact.*
+
+
+<img width="644" height="737" alt="02-security-filtering" src="https://github.com/user-attachments/assets/d4c5e13b-797d-4a61-bdde-318fdaf62504" />
+
 
 ### Firewall Root Cause
 `screenshots/phase3/03-firewall-rule-disabled.png`
@@ -161,17 +173,32 @@ The resulting Sysmon Event ID 1 landed **61 milliseconds** after the logon event
 `screenshots/phase3/04-netexec-pwn3d.png`
 *NetExec confirming `(Pwn3d!)` admin-level SMB access using the compromised low-privilege credential.*
 
+
+<img width="539" height="397" alt="04-netexec-pwn3d" src="https://github.com/user-attachments/assets/9016e7fb-434c-4022-8c9c-0c6f1d56c9bb" />
+
+
 ### Remote Execution Fallback
 `screenshots/phase3/05-atexec-fallback.png`
 *WMI execution failure followed by automatic fallback to atexec, returning `nt authority\system`.*
+
+
+<img width="539" height="395" alt="05-atexec-fallback" src="https://github.com/user-attachments/assets/243bf310-afbc-41a6-89f0-a486f9dae78e" />
+
 
 ### Kibana: Lateral Movement Logon (4624)
 `screenshots/phase3/06-kibana-4624-logon.png`
 *Type 3 network logon, Elevated Token: Yes, fully attributed to the compromised account.*
 
+<img width="638" height="735" alt="06-kibana-4624-logon" src="https://github.com/user-attachments/assets/c05964fd-d006-4e4b-8a71-15a5fd912d79" />
+
+
 ### Kibana: Process Creation Artifact (Sysmon Event ID 1)
 `screenshots/phase3/07-kibana-sysmon-whoami.png`
 *`whoami.exe` spawned by `cmd.exe`, spawned by `svchost.exe -k netsvcs`, output redirected to a random temp file — the atexec forensic signature — timestamped 61ms after the logon event.*
+
+
+<img width="642" height="689" alt="07-kibana-sysmon-whoami" src="https://github.com/user-attachments/assets/684019d8-ab82-4ddd-bafc-0e560704b4bb" />
+
 
 ---
 
