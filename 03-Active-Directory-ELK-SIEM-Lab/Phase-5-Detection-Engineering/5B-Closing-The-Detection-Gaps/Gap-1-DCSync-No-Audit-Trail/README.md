@@ -1,13 +1,4 @@
-## 5B — Operationalizing the Detections
-
-> This section closes the two recommendations flagged at the end of
-> the Incident Report (Recommendations 1 and 3). Both were documented
-> as configuration gaps — here they are converted into live, validated,
-> automated detections.
-
----
-
-### Detection 1: DCSync — Event ID 4662 Alert Rule
+### Detection 1: DCSync — Event ID 4662 Alert Rule ###
 
 **Gap closed:** Recommendation 1 — "Enable Directory Service Access
 (4662) auditing with SACLs scoped to the two DCSync-relevant
