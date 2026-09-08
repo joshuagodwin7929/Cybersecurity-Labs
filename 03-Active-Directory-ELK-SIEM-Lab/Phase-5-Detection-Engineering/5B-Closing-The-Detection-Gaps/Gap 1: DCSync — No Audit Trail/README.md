@@ -1,5 +1,3 @@
----
-
 ## 5B — Operationalizing the Detections
 
 > This section closes the two recommendations flagged at the end of
