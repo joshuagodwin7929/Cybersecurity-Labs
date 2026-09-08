@@ -123,18 +123,26 @@ CMD ["python", "/tmp/golden-ticket-detect.py"]
 ```
  
 Build: `docker build --network host -t gt-detect -f ~/Dockerfile.gtdetect ~`
+
+<img width="1274" height="767" alt="Docker Image" src="https://github.com/user-attachments/assets/b506ccd4-98e5-4d4f-a5c7-b6f6d2940e85" />
+
  
 Wrapper script (`run-gt-detect.sh`):
 ```bash
 #!/bin/bash
 docker run --rm --network elk-stack_elk-net gt-detect >> /home/ubuntuadmin/gt-detect.log 2>&1
 ```
- 
+
+<img width="1112" height="648" alt="image" src="https://github.com/user-attachments/assets/dcd41e8a-2263-4ea3-9036-af44fd1b22b6" />
+
+
 Cron job (runs every 10 minutes):
 ```
 */10 * * * * /home/ubuntuadmin/run-gt-detect.sh
 ```
- 
+<img width="767" height="407" alt="cron-1 (1)" src="https://github.com/user-attachments/assets/8d2b00bb-e6f4-461d-85c3-c386fe7311e5" />
+
+
 #### Positive test validation
  
 Forged a Golden Ticket from Kali using the krbtgt AES256 key dumped
@@ -160,7 +168,11 @@ The forged ticket authenticated to the DC and generated a 4769 for
     Time: 2026-09-08T01:27:04.287Z
 [+] Alert written to alerts-golden-ticket index ✅
 ```
- 
+
+
+<img width="1271" height="443" alt="Event 4769 captured" src="https://github.com/user-attachments/assets/46104fc6-f0e4-4c00-9168-db876c9c9ea3" />
+
+
 #### Negative test validation
  
 Normal interactive domain logon (j.jenkins logging into MY-LAB-PC) was
