@@ -18,7 +18,6 @@ The part 1, 2, 3 covered building and hardening the stack itself: Docker Compose
 - [4. Identifying Suspicious Authentication Activity](#4-identifying-suspicious-authentication-activity)
 - [5. Snapshot-Based Backups](#5-snapshot-based-backups)
 - [Lessons Learned](#-lessons-learned)
-- [Screenshots](#-screenshots)
 ---
  
 ## ✅ What This Part Covers
@@ -169,23 +168,6 @@ This was matched directly to a real, known action: re-applying the `vm.max_map_c
 - **"Can I account for this?" beats "is this suspicious?" as the first triage question.** Nearly all privileged activity in a personal lab is explainable by the operator's own actions — the skill is building the habit of actually checking, not assuming.
 - **A verified backup is not the same as a configured one.** The repository verification step (`Connected` status) and the manual "run now" trigger were both necessary to confirm the backup pipeline actually works end-to-end, not just that the settings were saved without error.
 - **Filesystem-based Elasticsearch repositories require an explicit allow-list (`path.repo`).** This is a deliberate security control, not a bug — Elasticsearch refuses to write snapshots to arbitrary paths without it.
----
- 
-## 📸 Screenshots
- 
-> Add screenshots to a `/screenshots` folder in this repo and reference them below.
- 
-| Description | Screenshot |
-|---|---|
-| Role privilege summary (`my_siem_log_viewer`) | `![role privileges](screenshots/role-privileges.png)` |
-| Logged in as restricted user, Discover working | `![restricted user discover](screenshots/restricted-user-discover.png)` |
-| ILM policy editor (Delete phase missing) | `![ilm policy](screenshots/ilm-policy.png)` |
-| Dashboard: Log Volume Over Time | `![log volume chart](screenshots/log-volume-chart.png)` |
-| Dashboard: Log Volume by Source | `![log source donut](screenshots/log-source-donut.png)` |
-| Auth log search results (sudo activity) | `![auth log search](screenshots/auth-log-search.png)` |
-| Snapshot repository verification (Connected) | `![repo verified](screenshots/repo-verified.png)` |
-| Snapshot policy summary (2 taken, 0 failures) | `![snapshot policy](screenshots/snapshot-policy.png)` |
- 
 ---
  
 ## 🔐 Security Disclaimer
