@@ -1,4 +1,4 @@
-# 🔐 Active Directory Certificate Services (AD CS)
+# Active Directory Certificate Services (AD CS)
 
 > Enterprise-style Public Key Infrastructure (PKI) implementation within an Active Directory environment, demonstrating certificate authority deployment, certificate issuance, trust management, certificate templates, and troubleshooting of certificate enrollment.
 
@@ -6,7 +6,7 @@
 
 ---
 
-## 📌 Project Overview
+## Project Overview
 
 This module implements **Active Directory Certificate Services (AD CS)** within the Active Directory homelab.
 
@@ -16,7 +16,7 @@ The project also involved troubleshooting real certificate enrollment issues inv
 
 ---
 
-# 1. 🏗️ What Did I Build?
+# 1. What Did I Build?
 
 I built an internal **Public Key Infrastructure (PKI)** using Active Directory Certificate Services.
 
@@ -51,7 +51,7 @@ The certificate was verified through the Windows certificate management interfac
 
 ---
 
-# 2. 🎯 Why Did I Build It?
+# 2. Why Did I Build It?
 
 The purpose of this module was to understand how organizations use **internal certificate authorities and PKI** to establish trust and support certificate-based security.
 
@@ -80,7 +80,7 @@ This module therefore extends the Active Directory lab beyond identity managemen
 
 ---
 
-# 3. 🛠️ What Technologies Did I Use?
+# 3. What Technologies Did I Use?
 
 | Technology | Purpose |
 |---|---|
@@ -98,11 +98,11 @@ This module therefore extends the Active Directory lab beyond identity managemen
 
 ---
 
-# 4. ⚙️ How Did I Build It?
+# 4. How Did I Build It?
 
 The implementation was completed in several stages.
 
-## Step 1 — Install Active Directory Certificate Services
+## Step 1: Install Active Directory Certificate Services
 
 The **AD CS** server role was installed on:
 
@@ -118,7 +118,7 @@ Enterprise Root Certification Authority
 
 ---
 
-## Step 2 — Configure the Certification Authority
+## Step 2: Configure the Certification Authority
 
 The CA was configured with:
 
@@ -136,7 +136,7 @@ JOSHUA-SERVER2022-CA
 
 ---
 
-## Step 3 — Configure a Certificate Template
+## Step 3: Configure a Certificate Template
 
 A certificate template was configured to control certificate enrollment.
 
@@ -150,7 +150,7 @@ The relevant permissions included:
 
 ---
 
-## Step 4 — Configure Certificate Enrollment
+## Step 4: Configure Certificate Enrollment
 
 The Windows 10 client was configured to obtain a certificate from the internal CA.
 
@@ -158,7 +158,7 @@ Certificate enrollment was tested both through the configured certificate infras
 
 ---
 
-## Step 5 — Configure Group Policy Autoenrollment
+## Step 5: Configure Group Policy Autoenrollment
 
 Certificate autoenrollment was enabled through:
 
@@ -179,7 +179,7 @@ gpupdate /force
 
 ---
 
-## Step 6 — Validate Certificate Issuance
+## Step 6: Validate Certificate Issuance
 
 The client certificate was inspected using:
 
@@ -197,7 +197,7 @@ The certificate was verified for:
 
 ---
 
-# 5. 🔐 What Security Concepts Did I Demonstrate?
+# 5. What Security Concepts Did I Demonstrate?
 
 This module demonstrates several important enterprise security concepts.
 
@@ -248,7 +248,7 @@ The implementation also provides practical context for investigating:
 
 ---
 
-# 6. 🧠 What Did I Learn?
+# 6. What Did I Learn?
 
 This project demonstrated that certificate services are not an isolated Windows Server feature. They depend on multiple components working together correctly.
 
@@ -323,7 +323,7 @@ Certificate trust depends on the client being able to establish a valid chain ba
 
 ---
 
-# 7. 🚀 What Would I Improve?
+# 7. What Would I Improve?
 
 The current implementation establishes a functional internal PKI foundation, but there are several areas I would expand in a production-oriented version of the lab.
 
@@ -349,7 +349,7 @@ This would allow the lab to progress from simply deploying PKI to actively **ass
 
 ---
 
-# 8. 📸 What Evidence Do I Have?
+# 8. What Evidence Do I Have?
 
 The implementation is supported by screenshots documenting the major configuration and validation stages.
 
@@ -431,19 +431,19 @@ A certificate issued by `Joshua-JOSHUA-SERVER20-CA`, shown in the Certification 
 
 | Validation | Result |
 | --- | --- |
-| AD CS role installed | 🟢 Passed |
-| Enterprise Root CA configured | 🟢 Passed |
-| Certificate template configured | 🟢 Passed |
-| Certificate template permissions validated | 🟢 Passed |
-| Group Policy autoenrollment configured | 🟢 Passed |
-| Windows 10 client enrollment | 🟢 Passed |
-| Certificate visible in `certlm.msc` | 🟢 Passed |
-| Certificate trust validated | 🟢 Passed |
-| RSA / SHA-256 configuration verified | 🟢 Passed |
+| AD CS role installed | Passed |
+| Enterprise Root CA configured | Passed |
+| Certificate template configured | Passed |
+| Certificate template permissions validated | Passed |
+| Group Policy autoenrollment configured | Passed |
+| Windows 10 client enrollment | Passed |
+| Certificate visible in `certlm.msc` | Passed |
+| Certificate trust validated | Passed |
+| RSA / SHA-256 configuration verified | Passed |
 
 ---
 
-# 🎯 Key Takeaways
+# Key Takeaways
 
 This project provided hands-on experience implementing and troubleshooting an internal PKI environment using Active Directory Certificate Services.
 
@@ -458,20 +458,20 @@ The most important lessons were:
 
 ---
 
-# 🔗 Related Modules
+# Related Modules
 
 | Module | Description |
 | --- | --- |
-| 01 — Core Infrastructure | Active Directory, DNS, and DHCP infrastructure |
-| 02 — Users & OUs | Users, groups, and Organizational Unit structure |
-| **03 — Certificate Services** | Internal PKI and certificate management |
-| 04 — Client Domain Join | Windows client domain integration |
-| 05 — Group Policies | Centralized security and configuration policies |
-| 06 — File Server & Shares | Department shares and NTFS permissions |
+| 01: Core Infrastructure | Active Directory, DNS, and DHCP infrastructure |
+| 02: Users & OUs | Users, groups, and Organizational Unit structure |
+| **03: Certificate Services** | Internal PKI and certificate management |
+| 04: Client Domain Join | Windows client domain integration |
+| 05: Group Policies | Centralized security and configuration policies |
+| 06: File Server & Shares | Department shares and NTFS permissions |
 
 ---
 
-## 🛡️ Project Summary
+## Project Summary
 
 **Active Directory • PKI • Certificate Services • Authentication • Trust • Group Policy**
 

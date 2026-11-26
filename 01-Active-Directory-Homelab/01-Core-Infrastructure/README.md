@@ -1,4 +1,4 @@
-# Core Infrastructure — AD DS, DNS & DHCP
+# Core Infrastructure: AD DS, DNS & DHCP
 
 > Foundational Windows Server infrastructure for the Active Directory homelab, including Active Directory Domain Services, DNS, and DHCP.
 
@@ -6,7 +6,7 @@
 
 ---
 
-## 📋 Overview
+## Overview
 
 This module establishes the core infrastructure required for the Active Directory environment.
 
@@ -21,27 +21,27 @@ The objective was to deploy and validate the services that support:
 
 | Service | Purpose | Status |
 |---|---|---|
-| **Active Directory Domain Services (AD DS)** | Domain and identity management | 🟢 Complete |
-| **DNS** | Internal name resolution and AD-integrated DNS | 🟢 Complete |
-| **DHCP** | Automated IP address configuration | 🟢 Complete |
+| **Active Directory Domain Services (AD DS)** | Domain and identity management | Complete |
+| **DNS** | Internal name resolution and AD-integrated DNS | Complete |
+| **DHCP** | Automated IP address configuration | Complete |
 
 ---
 
-## 🧭 Quick Navigation
+## Quick Navigation
 
-- [Lab Environment](#-lab-environment)
+- [Lab Environment](#lab-environment)
 - [1. Active Directory Domain Services](#1-active-directory-domain-services)
 - [2. DNS](#2-dns)
 - [3. DHCP](#3-dhcp)
-- [Troubleshooting & Lessons Learned](#-troubleshooting--lessons-learned)
-- [Validation Summary](#-validation-summary)
-- [Skills Demonstrated](#-skills-demonstrated)
-- [Key Takeaways](#-key-takeaways)
-- [Related Modules](#-related-modules)
+- [Troubleshooting & Lessons Learned](#troubleshooting--lessons-learned)
+- [Validation Summary](#validation-summary)
+- [Skills Demonstrated](#skills-demonstrated)
+- [Key Takeaways](#key-takeaways)
+- [Related Modules](#related-modules)
 
 ---
 
-## 🖥️ Lab Environment
+## Lab Environment
 
 | Component | Configuration |
 |---|---|
@@ -60,13 +60,13 @@ The objective was to deploy and validate the services that support:
 
 # 1. Active Directory Domain Services
 
-## 🎯 Objective
+## Objective
 
 Deploy the first Domain Controller and establish the Active Directory forest and domain that will support the remaining modules of the homelab.
 
 ---
 
-## ⚙️ Configuration
+## Configuration
 
 The following configuration was completed:
 
@@ -104,7 +104,7 @@ These checks were used to verify that the Domain Controller was operating correc
 
 # 2. DNS
 
-## 🎯 Objective
+## Objective
 
 Provide reliable internal name resolution for the Active Directory domain.
 
@@ -112,7 +112,7 @@ Active Directory depends heavily on DNS for locating domain services and enablin
 
 ---
 
-## ⚙️ Configuration
+## Configuration
 
 The following DNS configuration was completed:
 
@@ -148,13 +148,13 @@ Successful resolution confirmed that the DNS service was able to resolve the int
 
 # 3. DHCP
 
-## 🎯 Objective
+## Objective
 
 Provide automated network configuration to domain clients while maintaining separation between dynamically assigned addresses and statically assigned infrastructure.
 
 ---
 
-## ⚙️ Configuration
+## Configuration
 
 The following DHCP configuration was completed:
 
@@ -193,25 +193,25 @@ Successful DHCP assignment confirmed that the service was functioning as expecte
 
 ---
 
-# 🛠️ Troubleshooting & Lessons Learned
+# Troubleshooting & Lessons Learned
 
 A major goal of this module was not only to deploy the infrastructure, but also to understand how to troubleshoot problems when the services did not behave as expected.
 
 ---
 
-## Issue 1 — DNS Replication Delay
+## Issue 1: DNS Replication Delay
 
-### 🔴 Symptom
+### Symptom
 
 After creating the Active Directory-integrated forward lookup zone, DNS resolution from a test client did not work immediately.
 
-### 🔎 Investigation
+### Investigation
 
 The DNS configuration was reviewed first to determine whether the issue was caused by an incorrect zone or record configuration.
 
 The configuration appeared correct, so Active Directory replication was investigated as a possible cause.
 
-### 🛠️ Resolution
+### Resolution
 
 Active Directory replication was manually triggered using:
 
@@ -225,7 +225,7 @@ After replication completed, DNS resolution from the test client succeeded.
 
 The DNS information had not yet replicated to the test client.
 
-### 💡 Lesson Learned
+### Lesson Learned
 
 AD-integrated DNS changes are dependent on Active Directory replication and may not appear immediately on every domain member.
 
@@ -233,13 +233,13 @@ When troubleshooting DNS in an Active Directory environment, replication status 
 
 ---
 
-## Issue 2 — DHCP Scope IP Conflict
+## Issue 2: DHCP Scope IP Conflict
 
-### 🔴 Symptom
+### Symptom
 
 A statically configured device experienced an IP address conflict after another client received the same address through DHCP.
 
-### 🔎 Investigation
+### Investigation
 
 The DHCP scope was reviewed and the conflicting address was found to exist within the dynamic allocation range.
 
@@ -251,11 +251,11 @@ The static IP address existed inside the DHCP allocation range.
 
 This allowed the DHCP server to potentially assign the same address to another client.
 
-### 🛠️ Resolution
+### Resolution
 
 An exclusion range was configured within DHCP to prevent statically assigned infrastructure addresses from being dynamically allocated.
 
-### 💡 Lesson Learned
+### Lesson Learned
 
 Static addresses should be planned before creating the DHCP scope.
 
@@ -268,25 +268,25 @@ This prevents address conflicts and makes network administration more predictabl
 
 ---
 
-# 🧪 Validation Summary
+# Validation Summary
 
 The completed infrastructure was validated using both service-level and client-side testing.
 
 | Validation | Method | Result |
 |---|---|---|
-| Domain Controller health | `dcdiag` | 🟢 Passed |
-| Active Directory replication | `repadmin` | 🟢 Passed |
-| DNS resolution | `nslookup` | 🟢 Passed |
-| DNS resolution | `Resolve-DnsName` | 🟢 Passed |
-| DHCP authorization | Active Directory / DHCP console | 🟢 Passed |
-| DHCP address assignment | `ipconfig /all` | 🟢 Passed |
-| Gateway assignment | `ipconfig /all` | 🟢 Passed |
-| DNS configuration on client | `ipconfig /all` | 🟢 Passed |
-| Domain connectivity | Client validation | 🟢 Passed |
+| Domain Controller health | `dcdiag` | Passed |
+| Active Directory replication | `repadmin` | Passed |
+| DNS resolution | `nslookup` | Passed |
+| DNS resolution | `Resolve-DnsName` | Passed |
+| DHCP authorization | Active Directory / DHCP console | Passed |
+| DHCP address assignment | `ipconfig /all` | Passed |
+| Gateway assignment | `ipconfig /all` | Passed |
+| DNS configuration on client | `ipconfig /all` | Passed |
+| Domain connectivity | Client validation | Passed |
 
 ---
 
-# 🧠 Skills Demonstrated
+# Skills Demonstrated
 
 This module demonstrates practical experience with Windows Server infrastructure, Active Directory, networking, and troubleshooting.
 
@@ -334,7 +334,7 @@ ipconfig
 
 ---
 
-# 💡 Key Takeaways
+# Key Takeaways
 
 This module established the infrastructure foundation for the rest of the Active Directory homelab.
 
@@ -350,18 +350,18 @@ These principles will be applied throughout the remaining Active Directory modul
 
 ---
 
-# 🔗 Related Modules
+# Related Modules
 
 | Module | Description |
 |---|---|
-| [02 — Users & OUs](../02-Users-And-OUs/) | Organizational Units, users, groups, and department structure |
-| [03 — Certificate Services](../03-Certificate-Services/) | Active Directory Certificate Services and PKI |
-| [04 — Client Domain Join](../04-Client-Domain-Join/) | Joining Windows clients to the Active Directory domain |
-| [05 — Group Policies](../05-Group-Policies/) | Security policies, account restrictions, and centralized configuration |
-| [06 — File Server & Shares](../06-File-Server-Shares/) | Department shares and NTFS permissions |
+| [02: Users & OUs](../02-Users-And-OUs/) | Organizational Units, users, groups, and department structure |
+| [03: Certificate Services](../03-Certificate-Services/) | Active Directory Certificate Services and PKI |
+| [04: Client Domain Join](../04-Client-Domain-Join/) | Joining Windows clients to the Active Directory domain |
+| [05: Group Policies](../05-Group-Policies/) | Security policies, account restrictions, and centralized configuration |
+| [06: File Server & Shares](../06-File-Server-Shares/) | Department shares and NTFS permissions |
 
 ---
 
-## 🏠 Parent Project
+## Parent Project
 
 [← Back to Active Directory Homelab](../)

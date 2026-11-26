@@ -49,7 +49,7 @@ Joshua.local
 
 
 ## What I Demonstrated
-Understanding of how enterprise identity is structured for scale — OU 
+Understanding of how enterprise identity is structured for scale, OU 
 design directly determines how Group Policy, permissions, and 
 administrative delegation are scoped, which is core to both IT admin 
 and SOC investigative work (e.g. tracing which policies apply to a 

@@ -33,7 +33,7 @@ controller.
 
 
 ## What This Demonstrates
-Understanding of the client-side of domain membership — how a device 
+Understanding of the client-side of domain membership, how a device 
 authenticates against AD, inherits Group Policy, and becomes a managed 
 endpoint. This is the perspective needed when investigating a 
 compromised or misconfigured endpoint in a SOC context.
@@ -44,14 +44,14 @@ compromised or misconfigured endpoint in a SOC context.
 initially failed to join the domain, with an error indicating the 
 domain could not be found. The root cause was the client's network 
 adapter still pointing to a public/default DNS server instead of the 
-domain controller — since domain join relies on DNS to locate the 
+domain controller, since domain join relies on DNS to locate the 
 domain controller via SRV records, not just plain hostname resolution, 
 an incorrect DNS setting causes the join to fail even if the network 
 itself is reachable.
 
 Fixed by manually setting the client's preferred DNS server to the 
 domain controller's IP address ([192.168.18.50]) in the network adapter 
-settings, then retrying the domain join — which succeeded immediately 
+settings, then retrying the domain join, which succeeded immediately 
 afterward. This reinforced that DNS is a prerequisite for domain join, 
-not just a nice-to-have — the client needs to resolve the domain's SRV 
+not just a nice-to-have, the client needs to resolve the domain's SRV 
 records to even locate a domain controller to authenticate against.

@@ -1,6 +1,6 @@
-### Detection 1: DCSync — Event ID 4662 Alert Rule ###
+### Detection 1: DCSync: Event ID 4662 Alert Rule ###
 
-**Gap closed:** Recommendation 1 — "Enable Directory Service Access
+**Gap closed:** Recommendation 1, "Enable Directory Service Access
 (4662) auditing with SACLs scoped to the two DCSync-relevant
 replication rights."
 
@@ -14,10 +14,10 @@ Audit Policy being configured everywhere else.
 
 #### What was built
 
-**Step 1 — Enable Directory Service Access auditing on the DC.**
+**Step 1, Enable Directory Service Access auditing on the DC.**
 
 Configured via Group Policy and verified with auditpol (not assumed from
-GPO UI alone — the Account Lockout incident from Phase 1 taught that
+GPO UI alone, the Account Lockout incident from Phase 1 taught that
 GPO "configured" ≠ "applied"):
 
 ```
@@ -32,7 +32,7 @@ auditpol /get /subcategory:"Directory Service Access"
 
 
 
-**Step 2 — Add a SACL on the domain root object.**
+**Step 2, Add a SACL on the domain root object.**
 
 In ADUC (Advanced Features enabled): right-click `joshua.local` →
 Properties → Security → Advanced → Auditing → Add:
@@ -45,7 +45,7 @@ Properties → Security → Advanced → Auditing → Add:
 | Permission | All Extended Rights |
 
 This tells Windows to log any exercise of an extended right on the
-domain root — covering both DCSync-relevant GUIDs
+domain root, covering both DCSync-relevant GUIDs
 (`1131f6aa` Replicating Directory Changes and
 `1131f6ad` Replicating Directory Changes All) plus any other
 control-access abuse against the domain object.
@@ -55,22 +55,22 @@ control-access abuse against the domain object.
 
 
 
-**Step 3 — Simulate a realistic misconfiguration.**
+**Step 3, Simulate a realistic misconfiguration.**
 
 Rather than re-using the Domain Admin account for DCSync (which is
-expected and less interesting as a detection story), granted j.jenkins —
-a regular service account — the replication right directly via `dsacls`:
+expected and less interesting as a detection story), granted j.jenkins,
+a regular service account, the replication right directly via `dsacls`:
 
 ```cmd
 dsacls "DC=joshua,DC=local" /G "JOSHUA\j.jenkins:CA;Replicating Directory Changes"
 dsacls "DC=joshua,DC=local" /G "JOSHUA\j.jenkins:CA;Replicating Directory Changes All"
 ```
 
-This simulates a real-world over-permissioned service account — one of
-the most common misconfigurations in enterprise AD environments —
+This simulates a real-world over-permissioned service account, one of
+the most common misconfigurations in enterprise AD environments,
 rather than a Domain Admin doing what Domain Admins sometimes legitimately do.
 
-**Step 4 — Confirm the 4662 event in Kibana.**
+**Step 4, Confirm the 4662 event in Kibana.**
 
 Re-ran DCSync as j.jenkins:
 
@@ -99,7 +99,7 @@ all showing:
 
 Note: Winlogbeat 8.12.0 parses the replication GUIDs into the raw
 `message` field rather than a dedicated `winlog.event_data.Properties`
-field — the alert query targets `message` not `event_data.Properties`
+field, the alert query targets `message` not `event_data.Properties`
 for this reason. Always verify field names from actual captured events,
 not documentation.
 
@@ -159,7 +159,7 @@ The audit setup in steps 1 to 4 was right all along. The 4662 events were in Ela
 #### Detection note
 
 The GUID `1131f6ad` (Replicating Directory Changes All) is the more
-sensitive of the two — it includes secret attributes (password hashes).
+sensitive of the two, it includes secret attributes (password hashes).
 Filtering to this GUID rather than "All Extended Rights" reduces noise
 from unrelated control-access events (password resets, etc.) that the
 broad SACL will also log.
@@ -167,7 +167,7 @@ broad SACL will also log.
 #### False-positive considerations
 
 Legitimate DCSync is performed by Domain Controllers during normal AD
-replication — filter on `SubjectUserName` ending in `$` to exclude
+replication, filter on `SubjectUserName` ending in `$` to exclude
 machine accounts. Any non-DC, non-machine account triggering this rule
 is a genuine finding.
 

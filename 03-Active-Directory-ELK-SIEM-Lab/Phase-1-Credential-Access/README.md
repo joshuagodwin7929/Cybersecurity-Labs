@@ -1,4 +1,4 @@
-# Phase 1 — Recon & Credential Access
+# Phase 1: Recon & Credential Access
 ### Active Directory Attack & Defense Lab | Home SIEM Series
 
 > **Series context:** This is Phase 1 of a multi-phase, self-hosted Active Directory attack/defense lab, built on top of a personal Elastic Stack (ELK) SIEM I stood up first ([see ../02-SIEM-Lab-ELK-STACK repo](#)). Every attack technique in this phase was executed against my own lab, then hunted for in Kibana using the logging pipeline I built. The goal of the series is to learn detection engineering by attacking my own environment and measuring what does and doesn't show up in the logs.
@@ -16,7 +16,7 @@
 
 ## 1. What Did I Build?
 
-A fully instrumented Active Directory lab environment where I executed four real-world credential access techniques  **LLMNR/NBT-NS Poisoning, Password Spraying, Kerberoasting, and AS-REP Roasting**  against a domain I control, then used my own SIEM pipeline (Sysmon → Winlogbeat → Elasticsearch → Kibana) to determine whether each attack was detectable, and if not, why.
+A fully instrumented Active Directory lab environment where I executed four real-world credential access techniques **LLMNR/NBT-NS Poisoning, Password Spraying, Kerberoasting, and AS-REP Roasting** against a domain I control, then used my own SIEM pipeline (Sysmon → Winlogbeat → Elasticsearch → Kibana) to determine whether each attack was detectable, and if not, why.
 
 Each technique followed the same disciplined loop:
 
@@ -25,7 +25,7 @@ LOG FIRST  →  ATTACK SECOND  →  HUNT THIRD
 (confirm visibility)   (execute the technique)   (write & validate a detection query)
 ```
 
-This wasn't a "run a tool and watch it work" exercise  it was a detection-engineering exercise. Two of the four techniques exposed **real gaps** in my logging pipeline, which I root-caused and fixed as part of the work.
+This wasn't a "run a tool and watch it work" exercise it was a detection-engineering exercise. Two of the four techniques exposed **real gaps** in my logging pipeline, which I root-caused and fixed as part of the work.
 
 ---
 
@@ -62,26 +62,26 @@ Specifically, I wanted to:
 - 15 realistic domain user accounts were seeded across the domain to give password spraying and enumeration realistic scope
 - The domain's Default Domain Password Policy was hardened first (lockout threshold set to 5 attempts / 30-minute observation window) so that spraying behavior would be representative of a real hardened environment, not a wide-open lab
 
-### Technique 1 — LLMNR/NBT-NS Poisoning
+### Technique 1: LLMNR/NBT-NS Poisoning
 - Launched **Responder** on the attack box to listen for and respond to broadcast name-resolution requests
 - Captured **4 NTLMv2 hashes**: one from a planted test account, and three from real domain accounts (`Administrator`, `rose.diaz`, `sarah.connor`)
 - Attempted to crack all captured hashes offline with John the Ripper against rockyou.txt
   - The test account's weak password cracked successfully
   - All three real-account hashes resisted the full wordlist
-- **Pipeline gap found:** Sysmon Event ID 3 (Network Connection) and Event ID 22 (DNS Query) were not firing on the endpoint despite an active SwiftOnSecurity config — meaning this entire technique was currently invisible to host-based hunting. Documented as an open finding, with Zeek/Suricata flagged as a future network-layer visibility fix.
+- **Pipeline gap found:** Sysmon Event ID 3 (Network Connection) and Event ID 22 (DNS Query) were not firing on the endpoint despite an active SwiftOnSecurity config, meaning this entire technique was currently invisible to host-based hunting. Documented as an open finding, with Zeek/Suricata flagged as a future network-layer visibility fix.
 
-### Technique 2 — Password Spraying
+### Technique 2: Password Spraying
 - Ran a single-password spray with NetExec across all 15 domain accounts:
   ```
   netexec smb <DC_IP> -u users.txt -p 'Summer2026!'
   ```
 - Result: zero successful authentications, and the account lockout policy triggered cleanly and correctly on two accounts after 4 failed attempts
 - **Pipeline gap found and fixed:** the DC's Winlogbeat configuration had its Elasticsearch output entirely commented out, referenced a stale IP address left over from an earlier network migration, and contained duplicate configuration keys. Fixed the config and confirmed the DC's logs began flowing into Elasticsearch.
-- **Detection gap found and root-caused:** failed logon events (4625) appeared correctly in Kibana, but the expected account-lockout event (4740) never landed. Root cause: the domain's legacy Audit Policy was silently overriding the Advanced Audit Policy GPO, because the "Force audit policy subcategory settings" security option was not enabled. Confirmed via `auditpol` and `Get-ADUser` that the lockout mechanism itself worked correctly — only the *logging* of that lockout was broken.
+- **Detection gap found and root-caused:** failed logon events (4625) appeared correctly in Kibana, but the expected account-lockout event (4740) never landed. Root cause: the domain's legacy Audit Policy was silently overriding the Advanced Audit Policy GPO, because the "Force audit policy subcategory settings" security option was not enabled. Confirmed via `auditpol` and `Get-ADUser` that the lockout mechanism itself worked correctly, only the *logging* of that lockout was broken.
 
-### Technique 3 — Kerberoasting
+### Technique 3: Kerberoasting
 - Created a service account (`svc_sql`) with a Service Principal Name (SPN) to make it Kerberoastable
-- Initial ticket requests failed with `KDC_ERR_ETYPE_NOSUPP` — root-caused to the domain enforcing AES-only Kerberos encryption by default. Temporarily enabled RC4 support on the account to reproduce a realistic (still common in the wild) attack path
+- Initial ticket requests failed with `KDC_ERR_ETYPE_NOSUPP`, root-caused to the domain enforcing AES-only Kerberos encryption by default. Temporarily enabled RC4 support on the account to reproduce a realistic (still common in the wild) attack path
 - Requested a crackable service ticket using `impacket-GetUserSPNs`
 - Validated the exact attack signature in Kibana:
   ```
@@ -92,9 +92,9 @@ Specifically, I wanted to:
   - Weak reset password (`<redacted>`) → cracked instantly
 - Fixed an unrelated infrastructure issue found mid-phase: a `netplan` config on the ELK box referenced the wrong network interface name after an earlier VM network migration, which was silently breaking Kibana access
 
-### Technique 4 — AS-REP Roasting
+### Technique 4: AS-REP Roasting
 - Created a second account (`j.jenkins`) with Kerberos pre-authentication disabled (`DoesNotRequirePreAuth`)
-- Requested the account's AS-REP hash with `impacket-GetNPUsers` — worked cleanly on the first attempt
+- Requested the account's AS-REP hash with `impacket-GetNPUsers`, worked cleanly on the first attempt
 - Ran the same before/after cracking comparison as Kerberoasting: strong password resisted, weak reset password cracked instantly
 - Confirmed the attack's signature in the raw 4768 event (`Pre-Authentication Type: 0`, vs. `2` for a normal logon)
 - Validated the detection query in Kibana on the first attempt:
@@ -106,22 +106,22 @@ Specifically, I wanted to:
 
 ## 5. What Security Concepts?
 
-- **Kerberos authentication internals** — AS-REQ/AS-REP, TGS-REQ/TGS-REP, pre-authentication, ticket encryption types (RC4 vs. AES), and how each attack abuses a specific step in that exchange
-- **NTLM relay/poisoning fundamentals** — how LLMNR and NBT-NS fall back to broadcast resolution and why that makes them exploitable by default on unhardened networks
-- **Credential exposure vs. credential compromise** — a captured hash is not automatically a cracked password; cracking success depends entirely on password strength and wordlist coverage
-- **Defense-in-depth auditing** — the difference between a control *working* (account lockout) and a control being *observable* (lockout events actually reaching the SIEM), and how legacy Group Policy settings can silently undermine modern Advanced Audit Policy
-- **Detection engineering methodology** — hypothesize → validate against ground truth → fix pipeline gaps → re-validate, rather than assuming a SIEM is "just working"
-- **Encryption downgrade attacks** — how AES-only environments still expose RC4-crackable tickets when service accounts are misconfigured
+- **Kerberos authentication internals**: AS-REQ/AS-REP, TGS-REQ/TGS-REP, pre-authentication, ticket encryption types (RC4 vs. AES), and how each attack abuses a specific step in that exchange
+- **NTLM relay/poisoning fundamentals**: how LLMNR and NBT-NS fall back to broadcast resolution and why that makes them exploitable by default on unhardened networks
+- **Credential exposure vs. credential compromise**: a captured hash is not automatically a cracked password; cracking success depends entirely on password strength and wordlist coverage
+- **Defense-in-depth auditing**: the difference between a control *working* (account lockout) and a control being *observable* (lockout events actually reaching the SIEM), and how legacy Group Policy settings can silently undermine modern Advanced Audit Policy
+- **Detection engineering methodology**: hypothesize → validate against ground truth → fix pipeline gaps → re-validate, rather than assuming a SIEM is "just working"
+- **Encryption downgrade attacks**: how AES-only environments still expose RC4-crackable tickets when service accounts are misconfigured
 
 ---
 
 ## 6. What Did I Learn?
 
-- A password hash being captured says nothing about whether it's crackable — three of four real-world hashes in Technique 1 resisted a full wordlist attack, which reframed cracking as a password-strength problem, not just a capture problem
-- Logging pipelines fail silently. Two of four techniques in this phase produced **no usable detection signal at all** until I found and fixed a real misconfiguration — a lesson that "the SIEM is set up" and "the SIEM is capturing what you think it's capturing" are very different claims
+- A password hash being captured says nothing about whether it's crackable, three of four real-world hashes in Technique 1 resisted a full wordlist attack, which reframed cracking as a password-strength problem, not just a capture problem
+- Logging pipelines fail silently. Two of four techniques in this phase produced **no usable detection signal at all** until I found and fixed a real misconfiguration, a lesson that "the SIEM is set up" and "the SIEM is capturing what you think it's capturing" are very different claims
 - Legacy Windows audit policy settings can override modern GPO-based Advanced Audit Policy without any visible error, which is a trap I now know to check for (`auditpol /get` vs. what the GPO editor shows) in any real environment
-- Field names and event structures for the same logical event can vary in ways that aren't obvious from documentation — the AS-REP Roasting query worked first try, while the Kerberoasting query needed correction, teaching me to always validate a hunt query against a known-true positive before trusting it
-- Strong, complex passwords are a genuinely effective control against offline cracking, even when the underlying protocol weakness (Kerberoasting, AS-REP Roasting) is fully exploitable — the before/after comparisons made this concrete rather than theoretical
+- Field names and event structures for the same logical event can vary in ways that aren't obvious from documentation, the AS-REP Roasting query worked first try, while the Kerberoasting query needed correction, teaching me to always validate a hunt query against a known-true positive before trusting it
+- Strong, complex passwords are a genuinely effective control against offline cracking, even when the underlying protocol weakness (Kerberoasting, AS-REP Roasting) is fully exploitable, the before/after comparisons made this concrete rather than theoretical
 
 ---
 
@@ -196,10 +196,10 @@ Specifically, I wanted to:
 
 ## Related Write-Ups
 
-- [LLMNR Poisoning — Full Write-Up](#)
-- [Password Spraying & the Audit Policy Gap — Full Write-Up](#)
-- [Kerberoasting — Full Write-Up](#)
-- [AS-REP Roasting — Full Write-Up](#)
+- [LLMNR Poisoning, Full Write-Up](#)
+- [Password Spraying & the Audit Policy Gap, Full Write-Up](#)
+- [Kerberoasting, Full Write-Up](#)
+- [AS-REP Roasting, Full Write-Up](#)
 
 ---
 

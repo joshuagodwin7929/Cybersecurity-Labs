@@ -18,7 +18,7 @@ access its own data.
 - Configured NTFS permissions scoped to each department's security group 
   (created from the OU structure in [02-users-and-ous](../02-Users-And-OUs))
 - Configured share-level permissions to complement NTFS permissions 
-  (principle of least privilege — only the relevant department group 
+  (principle of least privilege, only the relevant department group 
   gets Modify/Read access)
 - Tested access as different department users to confirm isolation 
   (e.g. HR user cannot browse the Finance share)
@@ -31,14 +31,14 @@ access its own data.
 
 
 ## What This Demonstrates
-Practical application of access control principles — ensuring data is 
+Practical application of access control principles, ensuring data is 
 only accessible to authorized groups, which is a core control reviewed 
 during access audits and a key concept in preventing lateral movement 
 during a security incident.
 
 ## Notes / Lessons Learned
 
-No major permission conflicts here — applying the principle of least 
+No major permission conflicts here, applying the principle of least 
 privilege from the start (scoping NTFS permissions to each department's 
 security group, then matching share permissions rather than leaving 
 them at "Everyone: Full Control") avoided the most common cause of 

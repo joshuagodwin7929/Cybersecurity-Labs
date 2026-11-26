@@ -40,10 +40,10 @@ Simulated a realistic misconfiguration via GPO
         ▼  (Local Admin on MY-LAB-PC)
 Remote Authentication over SMB (NetExec)
         │
-        ▼  (4624 Type 3 Network Logon — logged)
+        ▼  (4624 Type 3 Network Logon - logged)
 Remote Code Execution (WMI failed → fell back to atexec)
         │
-        ▼  (Sysmon Event ID 1 — logged, 61ms after logon)
+        ▼  (Sysmon Event ID 1 - logged, 61ms after logon)
 NT AUTHORITY\SYSTEM
 ```
 
@@ -51,7 +51,7 @@ NT AUTHORITY\SYSTEM
 
 ## 2. Why Did I Build It?
 
-Phase 2's BloodHound mapping showed *theoretical* attack paths. This phase exists to prove — hands-on, not just on a graph — that a path can be walked in practice, and more importantly, to test whether the detection pipeline built in Phase 0 actually produces usable evidence when it happens.
+Phase 2's BloodHound mapping showed *theoretical* attack paths. This phase exists to prove, hands-on, not just on a graph, that a path can be walked in practice, and more importantly, to test whether the detection pipeline built in Phase 0 actually produces usable evidence when it happens.
 
 Real environments rarely hand attackers a clean lateral-movement path. More often, the path exists because of an everyday misconfiguration: a support or helpdesk account that quietly accumulated local admin rights it no longer needs. I wanted to simulate that specific, common scenario rather than an artificial "already have DA" shortcut, and then measure what a defender would actually see.
 
@@ -74,31 +74,31 @@ Real environments rarely hand attackers a clean lateral-movement path. More ofte
 
 ## 4. How Did I Build It?
 
-### Step 1 — Confirm there's no existing path
-Re-ran BloodHound against the domain. The compromised low-privilege account (`j.jenkins`, obtained via AS-REP Roasting in Phase 1) had **zero** local admin or execution rights anywhere in the environment — only the built-in `Administrator` account had local admin on the target workstation (`MY-LAB-PC`).
+### Step 1: Confirm there's no existing path
+Re-ran BloodHound against the domain. The compromised low-privilege account (`j.jenkins`, obtained via AS-REP Roasting in Phase 1) had **zero** local admin or execution rights anywhere in the environment, only the built-in `Administrator` account had local admin on the target workstation (`MY-LAB-PC`).
 
-### Step 2 — Simulate a realistic misconfiguration
-Rather than fabricate an artificial shortcut, I created a new, narrowly-scoped Group Policy Object (`Workstation-LocalAdmin-RestrictedGroups`) that grants a small set of standard user accounts local admin rights on `MY-LAB-PC` only — using **Security Filtering** (targeting the specific computer object, not an OU move) to avoid disturbing any other host or existing GPO in the domain.
+### Step 2: Simulate a realistic misconfiguration
+Rather than fabricate an artificial shortcut, I created a new, narrowly-scoped Group Policy Object (`Workstation-LocalAdmin-RestrictedGroups`) that grants a small set of standard user accounts local admin rights on `MY-LAB-PC` only, using **Security Filtering** (targeting the specific computer object, not an OU move) to avoid disturbing any other host or existing GPO in the domain.
 
-### Step 3 — Find and fix a real blocker
-Initial lateral movement attempts silently failed. Root cause: the **Domain-profile Windows Firewall rule for inbound SMB was disabled** on the workstation (the Private/Public profile copies were enabled, masking the problem). This is itself a legitimate hardening control working as intended — fixed via:
+### Step 3: Find and fix a real blocker
+Initial lateral movement attempts silently failed. Root cause: the **Domain-profile Windows Firewall rule for inbound SMB was disabled** on the workstation (the Private/Public profile copies were enabled, masking the problem). This is itself a legitimate hardening control working as intended, fixed via:
 ```powershell
 Set-NetFirewallRule -DisplayName "File and Printer Sharing (SMB-In)" -Profile Domain -Enabled True
 ```
 
-### Step 4 — Execute lateral movement
+### Step 4: Execute lateral movement
 ```bash
 netexec smb <target-ip> -u j.jenkins -p '<redacted>' -d joshua.local
 ```
-Result: `(Pwn3d!)` — confirmed admin-level SMB access, generating a **4624 Type 3 (network logon)** event on the target.
+Result: `(Pwn3d!)`, confirmed admin-level SMB access, generating a **4624 Type 3 (network logon)** event on the target.
 
-### Step 5 — Execute remotely and escalate
+### Step 5: Execute remotely and escalate
 ```bash
 netexec smb <target-ip> -u j.jenkins -p '<redacted>' -d joshua.local -x whoami
 ```
-The default WMI-based execution method failed (DCOM initialization error). NetExec automatically fell back to **atexec** — a technique that abuses the Windows Task Scheduler service (which runs inside a shared `svchost.exe -k netsvcs` process) to execute commands. Because Task Scheduler runs as SYSTEM, this single fallback delivered full `NT AUTHORITY\SYSTEM` execution.
+The default WMI-based execution method failed (DCOM initialization error). NetExec automatically fell back to **atexec**, a technique that abuses the Windows Task Scheduler service (which runs inside a shared `svchost.exe -k netsvcs` process) to execute commands. Because Task Scheduler runs as SYSTEM, this single fallback delivered full `NT AUTHORITY\SYSTEM` execution.
 
-### Step 6 — Hunt the evidence in Kibana
+### Step 6: Hunt the evidence in Kibana
 Correlated the full chain using KQL:
 ```
 event.code:4624 and winlog.event_data.LogonType:"3" and winlog.event_data.TargetUserName:"j.jenkins"
@@ -106,13 +106,13 @@ event.code:4624 and winlog.event_data.LogonType:"3" and winlog.event_data.Target
 ```
 event.code:1 and process.parent.name:"svchost.exe"
 ```
-The resulting Sysmon Event ID 1 landed **61 milliseconds** after the logon event — a clean, millisecond-correlated timeline from initial access to code execution.
+The resulting Sysmon Event ID 1 landed **61 milliseconds** after the logon event, a clean, millisecond-correlated timeline from initial access to code execution.
 
 ---
 
 ## 5. What Security Concepts?
 
-- **Lateral movement** (MITRE ATT&CK T1021 — Remote Services)
+- **Lateral movement** (MITRE ATT&CK T1021, Remote Services)
 - **Local admin rights abuse** as a real-world privilege escalation vector
 - **Scheduled Task execution / atexec** (MITRE ATT&CK T1053.005), a lesser-documented alternative to PsExec/WMI with a distinct forensic signature
 - **GPO Restricted Groups & Security Filtering** as both an attack surface (over-permissioning) and a precise administrative control
@@ -125,17 +125,17 @@ The resulting Sysmon Event ID 1 landed **61 milliseconds** after the logon event
 ## 6. What Did I Learn?
 
 - **A blocked path isn't the end of the exercise.** When BloodHound showed no viable path, the realistic next question asked constantly in real SOCs is usually "what misconfiguration would create one?" rather than treating the lab as complete.
-- **Silent failures are the most valuable troubleshooting lessons.** The disabled Domain-profile SMB rule failed with zero error output from the attack tooling — tracking it down required checking the *target's* configuration, not just the attacker's syntax.
+- **Silent failures are the most valuable troubleshooting lessons.** The disabled Domain-profile SMB rule failed with zero error output from the attack tooling, tracking it down required checking the *target's* configuration, not just the attacker's syntax.
 - **Tools have fallback behavior worth understanding.** NetExec's silent WMI → atexec fallback initially looked like a tool quirk. Digging into *why* it fell back, and what artifact that fallback leaves behind, was more educational than a clean one-shot success would have been.
-- **Not every "attack signature" looks alarming in isolation.** `svchost.exe` spawning `cmd.exe` is not inherently malicious — legitimate scheduled tasks do this constantly. The context (timing correlation to a suspicious logon, the account behind it, redirect-to-temp-file behavior) is what makes it worth flagging, not the process tree alone.
-- **Ground truth beats tooling assumptions.** When BloodHound's graph didn't reflect a GPO change I'd already verified at the OS level, I learned to trust `net localgroup administrators` and a live exploitation attempt over a single tool's output — and to investigate *why* the tool disagreed (a SAMR enumeration restriction) rather than assume the tool is always right.
+- **Not every "attack signature" looks alarming in isolation.** `svchost.exe` spawning `cmd.exe` is not inherently malicious, legitimate scheduled tasks do this constantly. The context (timing correlation to a suspicious logon, the account behind it, redirect-to-temp-file behavior) is what makes it worth flagging, not the process tree alone.
+- **Ground truth beats tooling assumptions.** When BloodHound's graph didn't reflect a GPO change I'd already verified at the OS level, I learned to trust `net localgroup administrators` and a live exploitation attempt over a single tool's output, and to investigate *why* the tool disagreed (a SAMR enumeration restriction) rather than assume the tool is always right.
 
 ---
 
 ## 7. What Would I Improve?
 
 - **Enable remote SAMR enumeration** (`RestrictRemoteSAM`) intentionally in the lab so BloodHound's graph reflects live changes in real time, closing the gap between ground truth and graph visibility.
-- **Tune Sysmon/detection rules specifically for atexec**, since most public detection content focuses on PsExec and WMI — a rule matching `svchost.exe -k netsvcs` spawning a shell with output redirected to `%WINDIR%\Temp\<random>` would catch this technique specifically.
+- **Tune Sysmon/detection rules specifically for atexec**: since most public detection content focuses on PsExec and WMI, a rule matching `svchost.exe -k netsvcs` spawning a shell with output redirected to `%WINDIR%\Temp\<random>` would catch this technique specifically.
 - **Add network-layer visibility** (e.g. Zeek or Suricata) to complement host-based Sysmon/Winlogbeat telemetry, since this phase's evidence relied entirely on endpoint logs.
 - **Automate the BloodHound collection → ingest workflow** (currently a manual scp + web upload), which cost significant time during troubleshooting.
 
@@ -164,7 +164,7 @@ The resulting Sysmon Event ID 1 landed **61 milliseconds** after the logon event
 
 
 ### Firewall Root Cause
-*Domain-profile SMB-In rule found disabled — the actual blocker for initial lateral movement attempts.*
+*Domain-profile SMB-In rule found disabled, the actual blocker for initial lateral movement attempts.*
 
 ### Confirmed Admin Access
 *NetExec confirming `(Pwn3d!)` admin-level SMB access using the compromised low-privilege credential.*
@@ -187,7 +187,7 @@ The resulting Sysmon Event ID 1 landed **61 milliseconds** after the logon event
 
 
 ### Kibana: Process Creation Artifact (Sysmon Event ID 1)
-*`whoami.exe` spawned by `cmd.exe`, spawned by `svchost.exe -k netsvcs`, output redirected to a random temp file — the atexec forensic signature — timestamped 61ms after the logon event.*
+*`whoami.exe` spawned by `cmd.exe`, spawned by `svchost.exe -k netsvcs`, output redirected to a random temp file, the atexec forensic signature, timestamped 61ms after the logon event.*
 
 
 <img width="642" height="689" alt="07-kibana-sysmon-whoami" src="https://github.com/user-attachments/assets/684019d8-ab82-4ddd-bafc-0e560704b4bb" />

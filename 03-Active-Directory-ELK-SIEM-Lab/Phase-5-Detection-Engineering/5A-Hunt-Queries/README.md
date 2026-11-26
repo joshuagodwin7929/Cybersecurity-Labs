@@ -20,7 +20,7 @@ Winlogbeat. Attacks executed from Kali Linux.
   - [6. Lateral Movement via atexec](../../Phase-3-Lateral-Movement)
   - [7. DCSync](../../Phase-4-DCSync-Golden-Ticket)
   - [8. Golden Ticket](../../Phase-4-DCSync-Golden-Ticket)
-- [Incident Report — Full Attack Chain](../../Phase-6-Incident-Report)
+- [Incident Report, Full Attack Chain](../../Phase-6-Incident-Report)
 
 ---
 
@@ -29,7 +29,7 @@ Winlogbeat. Attacks executed from Kali Linux.
 ### 1. LLMNR/NBT-NS Poisoning
 
 
-**MITRE ATT&CK:** T1557.001 — Adversary-in-the-Middle: LLMNR/NBT-NS Poisoning and SMB Relay
+**MITRE ATT&CK:** T1557.001, Adversary-in-the-Middle: LLMNR/NBT-NS Poisoning and SMB Relay
 
 ### What I Did (Attacker View)
 From Kali, ran Responder in analyze/poison mode on the shared lab subnet
@@ -40,7 +40,7 @@ the requested host, and the querying machine authenticated to it directly,
 handing over an NTLMv2 hash. Captured 4 hashes total (a planted test
 account plus three real accounts: `Administrator`, `rose.diaz`,
 `sarah.connor`). Cracked only the intentionally weak test account against
-`rockyou.txt` with John the Ripper — the three real-account hashes
+`rockyou.txt` with John the Ripper, the three real-account hashes
 resisted the full wordlist, confirming that **capture is guaranteed by the
 protocol design; cracking success is a separate, password-strength-dependent
 problem.**
@@ -57,12 +57,12 @@ documented rather than papered over:
   victim endpoint (`MY-LAB-PC`) despite the SwiftOnSecurity config
   shipping with NetworkConnect/DnsQuery rules enabled. Root cause not
   yet fully isolated (config not reloading cleanly, or a filtering rule
-  suppressing the traffic) — logged as an open finding, not silently
+  suppressing the traffic), logged as an open finding, not silently
   worked around.
 - **Consequence:** as configured today, this attack is **invisible** to
   the host-based Winlogbeat → Elasticsearch pipeline. There is no
   Windows Security Event ID that natively logs "a broadcast name
-  resolution protocol answered a query" — this is fundamentally a
+  resolution protocol answered a query", this is fundamentally a
   Layer 2/3 problem that host EDR was never well-suited to catch.
 
 ### KQL (once Sysmon 3/22 visibility is fixed)
@@ -79,12 +79,12 @@ event.code:3 and destination.port:(5355 or 137) and
 to catch responses arriving from a host that isn't the DC/DNS server on
 LLMNR (UDP 5355) or NBT-NS (UDP 137).
 
-### The Real Fix — Recommended Detection Architecture
+### The Real Fix: Recommended Detection Architecture
 Host logging alone cannot reliably catch this class of attack. The
 correct control is a **network-layer sensor** (Zeek/Suricata) with a
 signature for LLMNR/NBT-NS responses from non-authoritative hosts, or
 simply **disabling LLMNR and NBT-NS via GPO** where legacy application
-compatibility allows it — the strongest fix is prevention, not detection.
+compatibility allows it, the strongest fix is prevention, not detection.
 
 ### False-Positive Considerations
 - Legitimate multicast name resolution is common on networks that still
@@ -100,23 +100,23 @@ compatibility allows it — the strongest fix is prevention, not detection.
 ### 2. Password Spraying
 
 
-**MITRE ATT&CK:** T1110.003 — Brute Force: Password Spraying
+**MITRE ATT&CK:** T1110.003, Brute Force: Password Spraying
 
 ### What I Did (Attacker View)
 From Kali, used NetExec (`netexec smb 192.168.18.50 -u users.txt -p
 'Summer2026!'`) to try one password against all 15 harvested domain
 usernames via SMB. Zero valid credentials found. The Default Domain
 Password Policy lockout threshold of 5 triggered cleanly on two accounts
-(`angela.martin`, `marcus.holloway`) after repeated failed attempts —
+(`angela.martin`, `marcus.holloway`) after repeated failed attempts,
 4x `STATUS_LOGON_FAILURE` then `STATUS_ACCOUNT_LOCKED_OUT`, matching the
 configured policy.
 
 ### Log Source & Event ID
 - **Event ID 4625** (An account failed to log on) on the Domain
-  Controller — one per sprayed user per password. Low volume per user,
+  Controller, one per sprayed user per password. Low volume per user,
   distributed across many usernames, is the spray signature (as opposed
   to a brute force, which is high volume against one user).
-- **Event ID 4740** (A user account was locked out) — should fire on
+- **Event ID 4740** (A user account was locked out), should fire on
   the DC once the threshold is hit.
 - **Field of interest:** `winlog.event_data.LogonType` (3 = network,
   consistent with SMB), `winlog.event_data.TargetUserName`,
@@ -132,12 +132,12 @@ a **cardinality aggregation** in a Kibana Lens/TSVB panel: count of
 distinct `winlog.event_data.TargetUserName` values per source IP over a
 rolling 5-minute window. A single source IP touching more than ~5 distinct
 usernames in a short window, each with only 1–2 failures, is the spray
-signature — not a raw `event.code:4625` count.
+signature, not a raw `event.code:4625` count.
 
 ### False-Positive Considerations
 - Service accounts with an expired password that many machines still try
   to use can create a similar low-and-slow, multi-target failure pattern
-  — filter these accounts or correlate against a password-expiry report.
+ , filter these accounts or correlate against a password-expiry report.
 - Users who mistype their password once and get logged out of multiple
   cached sessions simultaneously (VPN + email + VDI) can trip a naive
   per-IP-per-user threshold; the distinct-username cardinality check
@@ -148,7 +148,7 @@ I hit a real detection gap here worth writing up on its own: the DC's
 Winlogbeat shipping config had `output.elasticsearch` fully commented
 out plus a stale post-migration IP, so the 4625s from this exact attack
 never reached Kibana until I found and fixed the pipeline. **A detection
-is only as good as the shipping pipeline underneath it** — the query
+is only as good as the shipping pipeline underneath it**, the query
 above was correct from day one, but useless while the beat wasn't
 actually forwarding data. Confirming end-to-end pipeline health (not
 just query syntax) is now a standing checklist item before trusting any
@@ -160,14 +160,14 @@ just query syntax) is now a standing checklist item before trusting any
 ### 3. Kerberoasting
 
 
-**MITRE ATT&CK:** T1558.003 — Steal or Forge Kerberos Tickets: Kerberoasting
+**MITRE ATT&CK:** T1558.003, Steal or Forge Kerberos Tickets: Kerberoasting
 
 ### What I Did (Attacker View)
 Created a service account (`svc_sql`) with an SPN
 (`MSSQLSvc/joshua-server2022.joshua.local:1433`) to have a legitimate
 target, then requested its service ticket with `impacket-GetUserSPNs`
 for offline cracking. Hit `KDC_ERR_ETYPE_NOSUPP` initially because the
-account's `msDS-SupportedEncryptionTypes` defaulted to AES-only — this
+account's `msDS-SupportedEncryptionTypes` defaulted to AES-only, this
 domain doesn't hand out crackable RC4 tickets by default, which is
 itself a positive security finding. Force-enabled RC4
 (`msDS-SupportedEncryptionTypes=4`) to obtain a crackable
@@ -178,21 +178,21 @@ John pass.
 
 ### Log Source & Event ID
 - **Event ID 4769** (A Kerberos service ticket was requested) on the DC
-  — logged for every TGS-REQ, legitimate or not.
+ , logged for every TGS-REQ, legitimate or not.
 - **Key field:** `winlog.event_data.TicketEncryptionType`. A value of
   `0x17` (RC4-HMAC) requested for a service account is the anomaly on an
   AES-enforced domain; `0x12`/`0x11` are AES256/AES128 and expected.
-- **Also useful:** `winlog.event_data.ServiceName` — repeated 4769s for
+- **Also useful:** `winlog.event_data.ServiceName`, repeated 4769s for
   many *different* SPNs from a single requesting account in a short
   window is the "enumerate every SPN in the domain" signature of a full
   Kerberoast sweep (this lab only requested one, so that pattern wasn't
-  generated here — worth simulating separately).
+  generated here, worth simulating separately).
 
 ### Kibana/KQL Query
 ```
 event.code:4769 and winlog.event_data.TicketEncryptionType:"0x17"
 ```
-Validated live against this lab — correctly and only returned the
+Validated live against this lab, correctly and only returned the
 `svc_sql` RC4 ticket request, with zero false positives from normal
 domain traffic (confirming the domain really is AES-only end to end).
 
@@ -201,13 +201,13 @@ For the sweep variant:
 event.code:4769 and winlog.event_data.TicketEncryptionType:"0x17"
 ```
 aggregated by `winlog.event_data.TargetUserName` (the requesting
-account) with a distinct-count of `winlog.event_data.ServiceName` — a
+account) with a distinct-count of `winlog.event_data.ServiceName`, a
 spike above 3–5 distinct SPNs per account per minute is the roast sweep.
 
 ### False-Positive Considerations
 - Legacy applications or older printers/appliances that only support
   RC4 will generate the same ticket-encryption-type signal legitimately
-  — an allowlist of known-legacy SPNs avoids alert fatigue.
+ , an allowlist of known-legacy SPNs avoids alert fatigue.
 - Environments that haven't enforced AES-only Kerberos (unlike this lab)
   will see RC4 constantly and need to pivot the detection to *ticket
   request volume/fan-out* instead of encryption type alone.
@@ -222,12 +222,12 @@ spike above 3–5 distinct SPNs per account per minute is the roast sweep.
 ### 4. AS-REP Roasting
 
 
-**MITRE ATT&CK:** T1558.004 — Steal or Forge Kerberos Tickets: AS-REP Roasting
+**MITRE ATT&CK:** T1558.004, Steal or Forge Kerberos Tickets: AS-REP Roasting
 
 ### What I Did (Attacker View)
 Created an account (`j.jenkins`) with `DoesNotRequirePreAuth` set,
 simulating a misconfigured account. Ran `impacket-GetNPUsers` against
-the domain — because Kerberos pre-authentication was disabled, the KDC
+the domain, because Kerberos pre-authentication was disabled, the KDC
 handed back an encrypted AS-REP without requiring any prior proof of
 knowing the password, giving a crackable `$krb5asrep$` hash with **zero
 credentials of my own required** (unlike Kerberoasting, which needs a
@@ -239,14 +239,14 @@ instantly.
 - **Event ID 4768** (A Kerberos authentication ticket (TGT) was
   requested) on the DC.
 - **Key field:** `winlog.event_data.PreAuthType`. A value of `0` means
-  no pre-authentication data was used — the AS-REP roasting signature.
+  no pre-authentication data was used, the AS-REP roasting signature.
   Normal logons show `2` (encrypted timestamp pre-auth).
 
 ### Kibana/KQL Query
 ```
 event.code:4768 and winlog.event_data.PreAuthType:"0"
 ```
-Validated cleanly on first try in this lab — 4 hits, all correctly
+Validated cleanly on first try in this lab, 4 hits, all correctly
 attributed to `j.jenkins`, no field-name guessing needed (unlike the
 Kerberoasting query, which required confirming the exact field name
 first).
@@ -257,7 +257,7 @@ first).
   modern, correctly configured domain. Any hit deserves investigation.
 - The rare legitimate case is a small number of intentionally
   pre-auth-disabled accounts kept for compatibility with old
-  Kerberos/UNIX clients that don't support pre-auth — these should be
+  Kerberos/UNIX clients that don't support pre-auth, these should be
   enumerated and allowlisted (`Get-ADUser -Filter
   {DoesNotRequirePreAuth -eq $true}`) so any *other* account triggering
   this is unambiguous.
@@ -273,24 +273,24 @@ first).
 
 **MITRE ATT&CK:** T1087.002 (Account Discovery: Domain Account) /
 T1069.002 (Permission Groups Discovery: Domain Groups) /
-T1018 (Remote System Discovery) — SharpHound's collection touches all
+T1018 (Remote System Discovery), SharpHound's collection touches all
 three as it pulls users, group memberships, ACLs, sessions, and trust
 data via LDAP and SAMR/RPC.
 
 ### What I Did (Attacker View)
 Ran SharpHound v2.14.0 (`-c All`, full collection) from a low-privileged
-domain-joined Windows 10 client — deliberately using only the access
+domain-joined Windows 10 client, deliberately using only the access
 level a compromised standard user session would have. Data was moved
 host-to-host via SCP to a self-hosted BloodHound CE instance (Neo4j +
 PostgreSQL, Docker Compose) on a separate Ubuntu box. Used a Cypher
 `shortestPath` query rather than the GUI pathfinder to confirm a
 directional privilege-escalation path from a low-privileged user to
-Domain Admins — the finding that shaped the rest of the attack chain
+Domain Admins, the finding that shaped the rest of the attack chain
 (Phase 3 onward).
 
 ### Log Source & Event ID
 SharpHound's collection is almost entirely **LDAP reads and SAMR/RPC
-session/group enumeration** — most of it looks identical to normal
+session/group enumeration**, most of it looks identical to normal
 domain-joined-machine chatter (GPO processing, Group Policy refresh,
 account lookups), which is what makes this technique hard to catch and
 a good one to be honest about in a write-up.
@@ -313,18 +313,18 @@ event.code:4661 and winlog.event_data.ObjectType:("SAM_DOMAIN" or "SAM_GROUP")
 aggregated by `winlog.event_data.SubjectUserName` and source workstation,
 looking for a single account generating an abnormally high count in a
 short window (SharpHound's full collection generates thousands of these
-in minutes — a normal user session generates a handful per hour at most).
+in minutes, a normal user session generates a handful per hour at most).
 
 ### False-Positive Considerations
 - Legitimate AD-integrated tools (backup software, vulnerability
   scanners, other security tooling) perform similarly broad LDAP/SAMR
-  enumeration — an allowlist of known scanner service accounts and
+  enumeration, an allowlist of known scanner service accounts and
   their expected schedule is necessary, or every recon run and every
   Nessus scan will alert identically.
 - Volume-based thresholds need tuning per environment size; a 500-user
   domain and a 50,000-user domain generate very different "normal"
   enumeration baselines from IT tooling.
-- This is the weakest detection surface in the whole chain — the
+- This is the weakest detection surface in the whole chain, the
   practical recommendation is **Microsoft Defender for Identity** or
   equivalent, which is purpose-built to baseline LDAP/SAMR reconnaissance
   patterns; a generic SIEM rule on raw event counts will be noisy in
@@ -338,14 +338,14 @@ in minutes — a normal user session generates a handful per hour at most).
 
 **MITRE ATT&CK:** T1021.002 (Remote Services: SMB/Windows Admin Shares)
 + T1569.002 (System Services: Service Execution, via the Task Scheduler
-fallback) — plus T1078.002 (Valid Accounts: Domain Accounts) for the
+fallback), plus T1078.002 (Valid Accounts: Domain Accounts) for the
 local-admin abuse that made it possible.
 
 ### What I Did (Attacker View)
 Simulated a real-world misconfiguration: granted `j.jenkins` (plus three
 other accounts) local admin on `MY-LAB-PC` via a scoped GPO restricted
 by Security Filtering, after BloodHound showed no existing admin path.
-Ran NetExec against `MY-LAB-PC` as `j.jenkins` — first hit "Pwn3d!"
+Ran NetExec against `MY-LAB-PC` as `j.jenkins`, first hit "Pwn3d!"
 confirming admin access, then NetExec attempted `WMIEXEC` for code
 execution, which failed on DCOM, and **auto-fell-back to `atexec`**
 (abuses the Task Scheduler RPC interface via `svchost.exe -k netsvcs`)
@@ -356,20 +356,20 @@ the initial SMB connection until corrected.
 
 ### Log Source & Event ID
 Three artifacts, chained by timestamp, is what makes this detection
-strong — no single one is fully conclusive alone:
+strong, no single one is fully conclusive alone:
 1. **Event ID 4624** (Logon) on `MY-LAB-PC`, Logon Type 3 (Network), for
-   `j.jenkins`, with `Elevated Token: Yes` — the tell that this network
+   `j.jenkins`, with `Elevated Token: Yes`, the tell that this network
    logon is using an administrative token, not a standard one.
 2. **Sysmon Event ID 1** (Process Create) for `whoami.exe`, with parent
-   `cmd.exe` and grandparent `svchost.exe -k netsvcs -p` — this specific
+   `cmd.exe` and grandparent `svchost.exe -k netsvcs -p`, this specific
    process lineage (svchost spawning cmd spawning the executed command)
    is the atexec/Task Scheduler signature, distinct from a user
    double-clicking whoami or a normal script running it.
 3. Sysmon's command-line field showing **output redirected to a random
-   filename under `\Windows\Temp`** — atexec's mechanism for retrieving
+   filename under `\Windows\Temp`**, atexec's mechanism for retrieving
    command output, since Task Scheduler itself has no stdout channel.
 
-In this lab, artifact #2 landed **61 milliseconds** after artifact #1 —
+In this lab, artifact #2 landed **61 milliseconds** after artifact #1,
 that tight timing correlation is itself a detection signal (a human
 admin logging on and then manually running a command takes seconds, not
 milliseconds).
@@ -387,16 +387,16 @@ event.code:4624 and winlog.event_data.LogonType:"3" and
 ```
 (elevated-token network logons), joined on `winlog.event_data.TargetUserName`
 and a tight time window (Kibana doesn't natively join across indices in
-Discover — this pairing is best expressed as two panels on one
+Discover, this pairing is best expressed as two panels on one
 dashboard with a shared time filter, or a transform/watcher if you want
 a single alert).
 
 ### False-Positive Considerations
 - Legitimate scheduled tasks and some monitoring agents also spawn
-  `cmd.exe` under `svchost.exe -k netsvcs` — baseline your own admin
+  `cmd.exe` under `svchost.exe -k netsvcs`, baseline your own admin
   tooling's process trees before treating every instance as malicious.
 - An elevated-token Type 3 logon by itself is completely normal for any
-  legitimate remote-admin workflow (RSAT, SCCM, patch management) — it's
+  legitimate remote-admin workflow (RSAT, SCCM, patch management), it's
   only suspicious paired with the atexec process-lineage signature and
   an account that isn't a known admin-tooling service account.
 - The specific `\Windows\Temp\<random>` output-redirection pattern is a
@@ -409,32 +409,32 @@ a single alert).
 ### 7. DCSync
 
 
-**MITRE ATT&CK:** T1003.006 — OS Credential Dumping: DCSync
+**MITRE ATT&CK:** T1003.006, OS Credential Dumping: DCSync
 
 ### What I Did (Attacker View)
 With `j.jenkins`'s local admin foothold on `MY-LAB-PC`, extracted the
 NTLM hash of a cached Administrator session via `lsassy` (had to
-manually disable Defender real-time protection first — both `lsassy`
+manually disable Defender real-time protection first, both `lsassy`
 and `handlekatz` failed outright against active EDR). Pass-the-Hash'd
 that Administrator hash into `impacket-secretsdump -just-dc-user krbtgt`,
 which impersonates a Domain Controller's replication rights to request
-the `krbtgt` account's secrets from the real DC — extracting its
+the `krbtgt` account's secrets from the real DC, extracting its
 NTLM, AES256, and AES128 keys plus the domain SID, all without ever
 touching the real Administrator password.
 
-### Log Source & Event ID — Honest Gap
+### Log Source & Event ID: Honest Gap
 This is the **most important finding in the entire lab**, and it's a
 negative result: **DCSync produced zero events.**
 - **Intended source:** Event ID 4662 (An operation was performed on an
   object) on the DC, specifically for the `DS-Replication-Get-Changes`
-  and `DS-Replication-Get-Changes-All` extended rights — the two
+  and `DS-Replication-Get-Changes-All` extended rights, the two
   permissions DCSync actually abuses.
 - **Actual status:** Directory Service Access auditing was **never
   enabled** in this domain's audit policy, so no 4662 was ever generated
   for this action, on this DC, by this account. This is a genuine
   configuration gap, not a pipeline/shipping bug (unlike the earlier
   gaps in this lab).
-- **What survived instead:** exactly one artifact — a single, entirely
+- **What survived instead:** exactly one artifact, a single, entirely
   normal-looking **Event ID 4624 Type 3 (Network) Kerberos logon** from
   the Kali IP, with **no preceding 4768** to pair it with (because the
   Pass-the-Hash/replication call doesn't request a ticket the way an
@@ -450,7 +450,7 @@ event.code:4662 and
 (the two GUIDs are `DS-Replication-Get-Changes` and
 `DS-Replication-Get-Changes-All`) filtered to
 `not winlog.event_data.SubjectUserName:(the real DC computer accounts)`
-— any account other than a legitimate DC requesting these rights is a
+any account other than a legitimate DC requesting these rights is a
 DCSync attempt by definition.
 
 ### Recommended Fix (documented, not yet implemented in this lab)
@@ -458,19 +458,19 @@ DCSync attempt by definition.
    SACL on the domain root filtered to the two replication GUIDs above,
    so the query above actually has data to run against.
 2. Deploy a network-layer or identity-layer sensor (Microsoft Defender
-   for Identity, or Zeek watching DRSUAPI/RPC traffic) — this is a
+   for Identity, or Zeek watching DRSUAPI/RPC traffic), this is a
    protocol-level abuse of a legitimate DC-to-DC mechanism, and
    host-based Sysmon logging on the victim workstation was never going
    to catch it, since the actual malicious call happens DC-side.
 3. As a compensating control, add a baseline rule: **4769 (TGS request)
-   without a preceding 4768 (TGT request) from the same session** — a
+   without a preceding 4768 (TGT request) from the same session**, a
    heuristic for credential replay/Pass-the-Hash generally, not DCSync
    specifically, but it would have flagged this chain's surviving
    artifact.
 
 ### False-Positive Considerations
 - Legitimate replication traffic between real Domain Controllers uses
-  these same rights constantly — the query above must exclude known DC
+  these same rights constantly, the query above must exclude known DC
   computer accounts, or every AD replication cycle triggers an alert.
 - Backup software (some AD-aware backup tools use DCSync-equivalent
   calls to back up AD) is a known legitimate source of this rights
@@ -482,7 +482,7 @@ DCSync attempt by definition.
 ### 8. Golden Ticket
 
 
-**MITRE ATT&CK:** T1558.001 — Steal or Forge Kerberos Tickets: Golden Ticket
+**MITRE ATT&CK:** T1558.001, Steal or Forge Kerberos Tickets: Golden Ticket
 
 ### What I Did (Attacker View)
 Using the `krbtgt` AES256 key and domain SID extracted via DCSync,
@@ -493,25 +493,25 @@ failure was itself informative:
 1. A fake/non-existent account name was rejected with
    `KDC_ERR_TGT_REVOKED`, due to **CVE-2021-42287** (PAC
    account-existence validation), which is patched on this Server 2022
-   DC — a positive finding, since older/unpatched DCs would have
+   DC, a positive finding, since older/unpatched DCs would have
    accepted a ticket for a made-up user.
 2. An RC4-encrypted forged ticket was rejected because this domain
    enforces AES-only Kerberos (the same policy finding from the
-   Kerberoasting write-up) — another positive control working as
+   Kerberoasting write-up), another positive control working as
    intended.
 3. Success only came from combining the real `krbtgt` AES256 key with a
    **real, existing account name** (`Administrator`).
 
-### Log Source & Event ID — Same Gap as DCSync
+### Log Source & Event ID: Same Gap as DCSync
 A forged Golden Ticket, by design, never touches the real DC's TGT
-issuance path — it's minted entirely offline. There is no 4768 for it to
+issuance path, it's minted entirely offline. There is no 4768 for it to
 generate. The only artifact is what appears when the ticket is *used*:
 a single **Event ID 4624 Type 3 (Network) Kerberos logon**, which is
 exactly the same surviving artifact documented in the DCSync note, and
 is **the single point where this entire attack chain intersects with
 host-based logging.**
 
-### Kibana/KQL Query — Baseline Heuristic
+### Kibana/KQL Query: Baseline Heuristic
 Since no ticket-forging-specific event exists, the only viable detection
 is the same cross-reference recommended in the DCSync note:
 ```
@@ -519,24 +519,24 @@ event.code:4624 and winlog.event_data.LogonType:"3" and
   winlog.event_data.AuthenticationPackageName:"Kerberos"
 ```
 correlated against **the absence of a matching 4768** for the same
-`TargetUserName` within a reasonable prior window (e.g. 10 hours — the
+`TargetUserName` within a reasonable prior window (e.g. 10 hours, the
 default Kerberos ticket lifetime, or longer if `ticketer` was given a
 custom `-duration`). Kibana can't express "absence of a correlated
-event" as a single KQL filter — this needs either a scheduled
+event" as a single KQL filter, this needs either a scheduled
 Elasticsearch transform comparing two rolling counts, or a Watcher/
 Detection Rule with a lookback join.
 
 ### Recommended Defensive Controls (documented findings from this lab)
-1. **Rotate the `krbtgt` password twice**, spaced apart by the maximum
+1. **Rotate the `krbtgt` password twice**: spaced apart by the maximum
    Kerberos ticket lifetime, to invalidate any outstanding forged
-   tickets — the only true remediation once `krbtgt` is believed
+   tickets, the only true remediation once `krbtgt` is believed
    compromised.
 2. Enable 4662 DS-Access auditing with replication-GUID filters (see
    DCSync note) to catch the theft *before* it becomes a forged ticket.
 3. Deploy a **4769-without-preceding-4768** baseline rule as a
    compensating control for the whole ticket-forging class, not just
    this one variant.
-4. Enforce AES-only Kerberos domain-wide (already in place here) — it
+4. Enforce AES-only Kerberos domain-wide (already in place here), it
    didn't prevent the attack, but it did add a real speed bump (attempt
    #2 above) and would stop unpatched/legacy tooling that can't forge
    AES tickets at all.
@@ -544,11 +544,11 @@ Detection Rule with a lookback join.
 ### False-Positive Considerations
 - The 4624-without-4768 heuristic will also flag legitimate Kerberos
   logons using cached/renewed tickets whose original 4768 fell outside
-  the lookback window — tune the window to comfortably exceed your
+  the lookback window, tune the window to comfortably exceed your
   domain's max ticket lifetime and renewal policy to avoid this.
 - Some legitimate cross-forest/cross-domain trust logons can also show
   Kerberos authentication without a locally-visible 4768, since the TGT
-  was issued by a different DC than the one you're monitoring —
+  was issued by a different DC than the one you're monitoring,
   centralize logging across all DCs before trusting this rule alone.
 
 
@@ -565,33 +565,33 @@ config to reproduce this, since I can't create Kibana objects directly.
 
 ### Recommended: 4 panels, one per your strongest signals
 
-### Panel 1 — Kerberoasting: RC4 Ticket Requests Over Time
+### Panel 1: Kerberoasting: RC4 Ticket Requests Over Time
 - **Type:** Lens, Bar (vertical, stacked by count)
 - **Data view:** `winlogbeat-*`
 - **Query:** `event.code:4769 and winlog.event_data.TicketEncryptionType:"0x17"`
 - **X-axis:** `@timestamp` (Date histogram, auto interval)
 - **Y-axis:** Count
 - **Break down by:** `winlog.event_data.TargetUserName.keyword` (top 5)
-- Why this panel: your validated, zero-false-positive query — the
+- Why this panel: your validated, zero-false-positive query, the
   strongest "clean win" to lead the dashboard with.
 
-### Panel 2 — AS-REP Roasting: PreAuth Type 0 Requests
+### Panel 2: AS-REP Roasting: PreAuth Type 0 Requests
 - **Type:** Lens, Bar (vertical)
 - **Query:** `event.code:4768 and winlog.event_data.PreAuthType:"0"`
 - **X-axis:** Date histogram on `@timestamp`
 - **Break down by:** `winlog.event_data.TargetUserName.keyword`
 
-### Panel 3 — Password Spray: Failed Logons by Source IP (Cardinality)
+### Panel 3: Password Spray: Failed Logons by Source IP (Cardinality)
 - **Type:** Lens, Table
 - **Query:** `event.code:4625 and winlog.event_data.LogonType:"3"`
 - **Rows:** `winlog.event_data.IpAddress.keyword`
 - **Metrics:** Count of events, **Unique Count** of
   `winlog.event_data.TargetUserName.keyword`
-- Sort descending by unique-user-count — a source IP touching 5+
+- Sort descending by unique-user-count, a source IP touching 5+
   distinct usernames is the spray signature, which this table surfaces
   directly (a plain count-over-time chart hides this pattern).
 
-### Panel 4 — Lateral Movement: Elevated Network Logons + atexec Chain
+### Panel 4: Lateral Movement: Elevated Network Logons + atexec Chain
 - **Type:** Lens, Bar (vertical), two saved queries as separate series
   via "Add layer," or two side-by-side panels in the same row:
   - Series A: `event.code:4624 and winlog.event_data.LogonType:"3" and winlog.event_data.ElevatedToken:"%%1842"`
@@ -605,10 +605,10 @@ config to reproduce this, since I can't create Kibana objects directly.
   attack timeline (e.g. the day you ran Phases 1–4) so it tells a story
   when opened, rather than showing an empty "last 15 minutes."
 - Add a **Markdown panel** at the top with a 2-3 line caption per
-  detection ("Panel 1: Kerberoasting — validated, zero FPs. Panel 3:
-  password spray — cardinality view, not raw count.") — this is what
+  detection ("Panel 1: Kerberoasting, validated, zero FPs. Panel 3:
+  password spray, cardinality view, not raw count."), this is what
   turns four charts into a narrative for someone skimming your portfolio.
-- **Skip DCSync/Golden Ticket from the dashboard itself** — you
+- **Skip DCSync/Golden Ticket from the dashboard itself**: you
   documented that they produce no visualizable signal in this lab's
   current config, and a panel that's empty by design reads as a bug
   unless captioned; better to reference that gap in the incident report
@@ -617,7 +617,7 @@ config to reproduce this, since I can't create Kibana objects directly.
 ### Exporting for your portfolio
 Once built: **Stack Management → Saved Objects → find your dashboard →
 Export.** That NDJSON file is a good thing to include in the folder
-alongside these write-ups — it lets anyone with an ELK stack import and
+alongside these write-ups, it lets anyone with an ELK stack import and
 literally see your dashboard, not just a screenshot of it.
 
 
