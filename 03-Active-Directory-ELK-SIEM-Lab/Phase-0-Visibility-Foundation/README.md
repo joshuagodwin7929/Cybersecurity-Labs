@@ -1,6 +1,6 @@
 # Phase 0 — Visibility Foundation: Building the Eyes Before the Fists
 
-Part of a multi-phase Active Directory attack/defense home lab. This phase focused entirely on building detection visibility across a small AD environment (Domain Controller + Windows 10 endpoint) **before** any attack simulation began — feeding Sysmon, PowerShell, and Windows Security telemetry into the self-hosted Elastic Stack SIEM built in [SIEM-Lab-ELK-Stack](../SIEM-Lab-ELK-Stack).
+Part of a multi-phase Active Directory attack/defense home lab. This phase focused entirely on building detection visibility across a small AD environment (Domain Controller + Windows 10 endpoint) **before** any attack simulation began — feeding Sysmon, PowerShell, and Windows Security telemetry into the self-hosted Elastic Stack SIEM built in [SIEM-Lab-ELK-Stack](../../02-SIEM-Lab-ELK-Stack).
 
 > You can't detect what you can't see. Before running a single attack technique, this phase proves the domain can answer a basic question: *who logged into what, and when?*
 
@@ -47,7 +47,7 @@ This also mirrors how real SOC/detection engineering work is structured — visi
 | Script logging | Windows PowerShell Script Block & Module Logging |
 | Audit policy | Windows Advanced Audit Policy Configuration (GPO) |
 | Log shipping | Winlogbeat 8.12.0 |
-| SIEM backend | Elasticsearch & Kibana 8.12.0 (self-hosted, see [SIEM-Lab-ELK-Stack](../SIEM-Lab-ELK-Stack)) |
+| SIEM backend | Elasticsearch & Kibana 8.12.0 (self-hosted, see [SIEM-Lab-ELK-Stack](../../02-SIEM-Lab-ELK-Stack)) |
 | Environment | Windows Server domain controller, Windows 10 domain-joined endpoint |
 | Deception | Canary token file on a monitored file share |
 
@@ -168,16 +168,34 @@ A normal user logon returned — fully attributable to a user, host, and timesta
 
 ## 📸 Screenshots
 
-> Add screenshots to a `/screenshots` folder in this directory and reference them below.
+**Sysmon running with the SwiftOnSecurity config**
 
-| Description | Screenshot |
-|---|---|
-| Sysmon running with SwiftOnSecurity config loaded | `![sysmon running](screenshots/sysmon-running.png)` |
-| PowerShell 4103/4104 events in Event Viewer | `![powershell logging](screenshots/powershell-logging.png)` |
-| Advanced Audit Policy categories in GPME | `![audit policy gpo](screenshots/audit-policy-gpo.png)` |
-| Event ID 4663 on the audited file share | `![event 4663](screenshots/event-4663.png)` |
-| Kibana Discover — live winlogbeat-* data | `![kibana winlogbeat data](screenshots/kibana-winlogbeat-data.png)` |
-| Event ID 4624 — exit criteria validation | `![event 4624 validation](screenshots/event-4624-validation.png)` |
+![Sysmon running](Screenshots/01-sysmon-running/01-sysmon-running.png)
+
+**PowerShell Module Logging (4103) and Script Block Logging (4104)**
+
+![PowerShell 4103](Screenshots/02-powershell-logging/02-powershell-logging-event-4103.png)
+![PowerShell 4104](Screenshots/02-powershell-logging/02-powershell-logging-event-4104.png)
+
+**Advanced Audit Policy configured through Group Policy**
+
+![Audit policy 1](Screenshots/03-audit-policy-gpo/03-audit-policy-gpo-01.png)
+![Audit policy 2](Screenshots/03-audit-policy-gpo/03-audit-policy-gpo-02.png)
+![Audit policy 3](Screenshots/03-audit-policy-gpo/03-audit-policy-gpo-03.png)
+
+**Event ID 4663 on the audited file share**
+
+![Event 4663](Screenshots/04-event-4663/04-event-4663.png)
+
+**Live winlogbeat-* data in Kibana Discover**
+
+![Kibana winlogbeat data 1](Screenshots/05-kibana-winlogbeat-date/05-kibana-winlogbeat-date-01.png)
+![Kibana winlogbeat data 2](Screenshots/05-kibana-winlogbeat-date/05-kibana-winlogbeat-date-02.png)
+![Kibana winlogbeat data 3](Screenshots/05-kibana-winlogbeat-date/05-kibana-winlogbeat-date-03.png)
+
+**Event ID 4624: the exit criteria, a normal logon searchable in Kibana**
+
+![Event 4624 validation](Screenshots/06-event-4624-validation/06-event-4624-validation.png)
 
 ---
 
@@ -189,10 +207,12 @@ A normal user logon returned — fully attributable to a user, host, and timesta
 - [x] Apply a SACL and canary token on a file share
 - [x] Ship logs via Winlogbeat into Elasticsearch
 - [x] Validate a normal logon (4624) is searchable in Kibana
-- [ ] Phase 1 — Recon & Credential Access techniques (LLMNR poisoning, password spraying, Kerberoasting, AS-REP roasting)
-- [ ] Phase 2 — Attack Path Mapping with BloodHound
-- [ ] Phase 3 — Lateral Movement & Escalation
-- [ ] Phase 4 — Persistence (DCSync & Golden Ticket)
+- [x] [Phase 1](../Phase-1-Credential-Access): Recon and credential access (LLMNR poisoning, password spraying, Kerberoasting, AS-REP Roasting)
+- [x] [Phase 2](../Phase-2-Attack-Path-Mapping): Attack path mapping with BloodHound
+- [x] [Phase 3](../Phase-3-Lateral-Movement): Lateral movement and escalation
+- [x] [Phase 4](../Phase-4-DCSync-Golden-Ticket): Persistence (DCSync and Golden Ticket)
+- [x] [Phase 5](../Phase-5-Detection-Engineering): Detection engineering
+- [x] [Phase 6](../Phase-6-Incident-Report): Incident report
 
 ---
 

@@ -394,7 +394,7 @@ The goal is not simply to follow tutorials, but to build, troubleshoot, document
 
 | Project | Description |
 |---|---|
-| [📊 SIEM Lab – ELK Stack](../SIEM-Lab-ELK-Stack/) | Centralized security monitoring and log analysis |
+| [📊 SIEM Lab – ELK Stack](../02-SIEM-Lab-ELK-Stack/) | Centralized security monitoring and log analysis |
 | [🛡️ Cybersecurity-Labs](../) | View all cybersecurity homelab projects |
 
 ---

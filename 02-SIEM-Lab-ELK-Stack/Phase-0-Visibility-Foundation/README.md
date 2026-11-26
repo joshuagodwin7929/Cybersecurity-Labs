@@ -33,9 +33,6 @@ Verified via:
 sc query sysmon64
 Get-Service Sysmon64
 ```
- [Screenshot:Sysmon service running and generating events](./screenshots/sysmon-running.png)
-
- 
  <img width="365" height="196" alt="Sysmon WIN10" src="https://github.com/user-attachments/assets/c25ae283-375d-45ba-9413-b88117b22632" />
 
  
@@ -47,14 +44,8 @@ Enabled via **Computer Configuration > Administrative Templates > Windows Compon
 - **Turn on PowerShell Script Block Logging** — Enabled
 Validated by generating PowerShell activity and confirming Event IDs **4103** (pipeline execution) and **4104** (script block text) in `Microsoft-Windows-PowerShell/Operational`.
 
-[Screenshot:PowerShell 4103/4104 events in Event Viewer](./screenshots/powershell-logging.png)
-
-
 <img width="509" height="361" alt="Event ID 4103" src="https://github.com/user-attachments/assets/66a6b06c-ef90-4c9b-881c-ed2598c51039" />
 
-
-
-[Screenshot:PowerShell 4103/4104 events in Event Viewer](./screenshots/powershell-logging.png)
 
 
 <img width="511" height="359" alt="Event ID 4104" src="https://github.com/user-attachments/assets/18396c99-10b1-4315-8c7a-a26537aabf1e" />
@@ -73,9 +64,6 @@ Configured under **Computer Configuration > Windows Settings > Security Settings
 | Account Management | User Account Management, Security Group Management | 4720, 4722, 4724, 4738 |
 | Object Access | File System, File Share | 4663 |
 
-[Screenshot:Advanced Audit Policy categories configured in Group Policy Management Editor](./screenshots/audit-policy-gpo.png)
-
-
 <img width="589" height="402" alt="All Audit Policy" src="https://github.com/user-attachments/assets/2d3cd735-8d7c-4a9a-8894-e2bcff598e30" />
 
  
@@ -90,15 +78,11 @@ A SACL was applied directly to a departmental share (on its local folder path, n
 A canary token file was also placed in the share as a lightweight, independent tripwire.
 Validated by creating/deleting a test file and confirming **Event ID 4663** in the Security log.
 
-[Screenshot: Audit File Share]
 
 
 <img width="589" height="419" alt="Audit File Share" src="https://github.com/user-attachments/assets/fe3877f6-33c8-42f1-ba49-47ce4449b21d" />
 
  
-
-[Screenshot: Event 4663 confirming file share object access auditing](./screenshots/event-4663.png)
-
 
 <img width="587" height="407" alt="EventViewer 4663" src="https://github.com/user-attachments/assets/86798751-4085-4faf-b6cf-e34f06a449ee" />
 
@@ -117,7 +101,6 @@ winlogbeat.event_logs:
   - name: Microsoft-Windows-PowerShell/Operational
 ```
 
-[Screenshot:Kibana Discover showing live winlogbeat-* data]
 
 
 <img width="584" height="452" alt="winlogbeat yml" src="https://github.com/user-attachments/assets/2f0c8847-7c30-4689-8943-7da65656c4c1" />
@@ -149,51 +132,30 @@ In Kibana, created a `winlogbeat-*` data view and confirmed:
 ```
 event.code:4624
 ```
-[Screenshot: Kibana Discover showing live winlogbeat-* data](./screenshots/kibana-winlogbeat-data.png
-
-
-<img width="1280" height="735" alt="Winlogbeat Liveview" src="https://github.com/user-attachments/assets/bcaa0dd5-2381-40ff-96ec-e60a8c8a93e7" />
-
-
-This confirmed the core Phase 0 exit criteria: full "who logged into what, when" visibility across the domain.
-
-
-
-[Screenshot: Event 4624]
-
-
-<img width="1280" height="734" alt="event 4624" src="https://github.com/user-attachments/assets/96c1d42e-d119-4c5c-8435-e89728939b9f" />
-
- 
-
-
- 
-## Screenshots
- 
 > Screenshots below are organized by step. Replace the placeholder paths with your own images (recommend a `/screenshots` folder in this repo, referenced as `./screenshots/filename.png`).
  
 ### Sysmon Deployment
-![Sysmon service running and generating events](./screenshots/sysmon-running.png)
+![Sysmon service running and generating events](https://github.com/user-attachments/assets/c25ae283-375d-45ba-9413-b88117b22632)
 *Sysmon installed with the SwiftOnSecurity config, actively logging process creation and DNS query events.*
  
 ### PowerShell Logging
-![PowerShell 4103/4104 events in Event Viewer](./screenshots/powershell-logging.png)
+![PowerShell 4103/4104 events in Event Viewer](https://github.com/user-attachments/assets/66a6b06c-ef90-4c9b-881c-ed2598c51039)
 *Script Block Logging (4104) and Module Logging (4103) confirmed in the PowerShell Operational log.*
  
 ### Advanced Audit Policy — GPO Configuration
-![Advanced Audit Policy categories configured in Group Policy Management Editor](./screenshots/audit-policy-gpo.png)
+![Advanced Audit Policy categories configured in Group Policy Management Editor](https://github.com/user-attachments/assets/2d3cd735-8d7c-4a9a-8894-e2bcff598e30)
 *Logon/Logoff, Kerberos, Account Management, and Object Access categories enabled.*
  
 ### File Share SACL & Event ID 4663
-![Event 4663 confirming file share object access auditing](./screenshots/event-4663.png)
+![Event 4663 confirming file share object access auditing](https://github.com/user-attachments/assets/86798751-4085-4faf-b6cf-e34f06a449ee)
 *A create/delete on an audited file share generating a searchable Security log event.*
  
 ### Winlogbeat → Elasticsearch Pipeline
-![Kibana Discover showing live winlogbeat-* data](./screenshots/kibana-winlogbeat-data.png)
+![Kibana Discover showing live winlogbeat-* data](https://github.com/user-attachments/assets/bcaa0dd5-2381-40ff-96ec-e60a8c8a93e7)
 *Live Sysmon and Security events flowing from both hosts into the winlogbeat-* index.*
  
 ### Final Validation — Event ID 4624
-![Kibana search for event.code:4624 returning a logon event](./screenshots/event-4624-validation.png)
+![Kibana search for event.code:4624 returning a logon event](https://github.com/user-attachments/assets/96c1d42e-d119-4c5c-8435-e89728939b9f)
 *A normal user logon, fully searchable — meeting Phase 0's exit criteria.*
  
 ## Lessons Learned

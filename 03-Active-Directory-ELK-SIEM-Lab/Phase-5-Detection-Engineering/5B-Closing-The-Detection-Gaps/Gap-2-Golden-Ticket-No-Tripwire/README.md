@@ -197,7 +197,7 @@ written. No false positives generated on normal Kerberos activity.
  
 | Recommendation (from Incident Report) | Status |
 |---|---|
-| 1. Enable 4662 auditing with DCSync SACLs | ✅ Built, confirmed firing |
+| 1. Enable 4662 auditing with DCSync SACLs | ✅ Auditing confirmed. The first alert rule never matched; fixed and validated with a live alert in November 2026 ([correction](../Gap-1-DCSync-No-Audit-Trail/README.md#correction-november-2026)) |
 | 3. Add 4769-without-4768 correlation rule | ✅ Built, positive + negative test validated |
  
 The two gaps that made DCSync and Golden Ticket "invisible" in the

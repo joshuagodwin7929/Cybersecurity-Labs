@@ -357,72 +357,71 @@ Evidence is organized separately from the documentation:
 
 ```text
 03-Certificate-Services/
-│
 ├── README.md
-│
 └── evidence/
-    ├── 01-ad-cs-installation.png
-    ├── 02-enterprise-root-ca.png
-    ├── 03-certificate-template.png
-    ├── 04-certificate-template-permissions.png
-    ├── 05-autoenrollment-policy.png
-    ├── 06-client-certificate.png
-    └── 07-certificate-trust-chain.png
+    ├── 01-active-directory-certificate-service-role.png
+    ├── 02-active-directory-certificate-service-root-ca.png
+    ├── 03-active-directory-certificate-service-configuration.png
+    ├── 04-active-directory-ou-structure.png
+    ├── 05-active-directory-certificate-service-role-certificate.png
+    ├── 06-ad-certificate-autoenrollment-policy-enabled.png
+    ├── 07-active-directory-certificate-template.png
+    └── 08-active-directory-certificate-commands.png
 ```
 
-## AD CS Installation
+## AD CS role installation
 
-Evidence showing the installation and configuration of the Active Directory Certificate Services role.
+Selecting the Active Directory Certificate Services role in the Add Roles and Features wizard.
 
-![AD CS Installation](./evidence/01-ad-cs-installation.png)
+![AD CS role installation](./evidence/01-active-directory-certificate-service-role.png)
 
 ---
 
 ## Enterprise Root CA
 
-Evidence showing the Enterprise Root Certification Authority configuration.
+Choosing Root CA as the CA type.
 
-![Enterprise Root CA](./evidence/02-enterprise-root-ca.png)
-
----
-
-## Certificate Template
-
-Evidence showing the configured certificate template.
-
-![Certificate Template](./evidence/03-certificate-template.png)
+![Root CA selected](./evidence/02-active-directory-certificate-service-root-ca.png)
 
 ---
 
-## Certificate Template Permissions
+## CA configuration
 
-Evidence showing the permissions used to control certificate enrollment.
+The confirmation page: Enterprise Root CA, RSA 2048-bit key, SHA256, five-year validity.
 
-![Certificate Template Permissions](./evidence/04-certificate-template-permissions.png)
-
----
-
-## Autoenrollment Policy
-
-Evidence showing the Group Policy configuration used to enable certificate autoenrollment.
-
-![Certificate Autoenrollment Policy](./evidence/05-autoenrollment-policy.png)
+![CA configuration summary](./evidence/03-active-directory-certificate-service-configuration.png)
 
 ---
 
-## Client Certificate
+## Custom certificate template
 
-Evidence showing the certificate successfully issued to the Windows 10 client.
+The "Joshua Homelab Certificate" template published on the CA, for server and client authentication.
 
-![Client Certificate](./evidence/06-client-certificate.png)
+![Certificate templates](./evidence/07-active-directory-certificate-template.png)
 
 ---
 
-## Certificate Trust Chain
+## Autoenrollment policy
 
-Evidence showing the certificate chain and trusted CA relationship.
+The Group Policy setting that turns on certificate autoenrollment for domain members.
 
-![Certificate Trust Chain](./evidence/07-certificate-trust-chain.png)
+![Autoenrollment policy enabled](./evidence/06-ad-certificate-autoenrollment-policy-enabled.png)
+
+---
+
+## Triggering enrollment
+
+Forcing a policy refresh with `gpupdate /force` and enrollment with `certutil -pulse`. The first attempt failed because I typed `cerutil`; the second worked.
+
+![gpupdate and certutil -pulse](./evidence/08-active-directory-certificate-commands.png)
+
+---
+
+## Issued certificate
+
+A certificate issued by `Joshua-JOSHUA-SERVER20-CA`, shown in the Certification Authority console.
+
+![Issued certificate](./evidence/05-active-directory-certificate-service-role-certificate.png)
 
 > **Evidence is included to demonstrate the actual implementation and validation of the environment rather than simply documenting theoretical configuration steps.**
 

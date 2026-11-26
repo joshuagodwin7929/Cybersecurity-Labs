@@ -11,7 +11,7 @@
 
 **Simulating the most dangerous Active Directory attack chain and discovering why a SIEM alone couldn't see it.**
 
-[← Phase 3: Lateral Movement](../Phase-3-Lateral-Movement) · [Phase 5: Detection Engineering →](../Phase5)
+[← Phase 3: Lateral Movement](../Phase-3-Lateral-Movement) · [Phase 5: Detection Engineering →](../Phase-5-Detection-Engineering)
 
 </div>
 
@@ -28,7 +28,7 @@
 | [Phase 2](../Phase-2-Attack-Path-Mapping) | Attack Path Mapping | BloodHound CE, SharpHound, AD Enumeration |
 | [Phase 3](../Phase-3-Lateral-Movement) | Lateral Movement | GPO Abuse, NetExec, atexec, SYSTEM Execution |
 | **Phase 4** | **Persistence** | **DCSync, Golden Ticket, Detection Gaps** |
-| [Phase 5](../Phase5) | Detection Engineering | KQL Queries, Kibana Dashboard, Incident Report |
+| [Phase 5](../Phase-5-Detection-Engineering) | Detection Engineering | KQL Queries, Kibana Dashboard, Incident Report |
 
 ---
 
@@ -474,7 +474,6 @@ are detection dependencies, not just operational ones.
 > `Joshua\Administrator` NTLM hash `203072cc67...` after
 > Defender real-time protection was disabled.
 
-![lsassy hash extraction](./screenshots/lsassy-administrator-hash.png)
 <img width="538" height="318" alt="Administrator NTLM Hash" src="https://github.com/user-attachments/assets/ad0943ee-2780-4385-8491-5aef34192826" />
 
 
@@ -486,7 +485,6 @@ are detection dependencies, not just operational ones.
 > AES256 key, AES128 key, and DES key extracted via Pass-the-Hash.
 > No interactive DC logon required.
 
-![DCSync krbtgt output](./screenshots/dcsync-krbtgt-output.png)
 <img width="500" height="158" alt="DCSync" src="https://github.com/user-attachments/assets/988bdd79-d0a8-4552-9607-a858c9207b02" />
 
 
@@ -498,7 +496,6 @@ are detection dependencies, not just operational ones.
 > enumeration including Domain SID `S-1-5-21-1811309030-...`
 > and all 30+ domain accounts exposed via a single RPC call.
 
-![lookupsid domain enumeration](./screenshots/lookupsid-domain-sid.png)
 <img width="468" height="382" alt="Doamin SID" src="https://github.com/user-attachments/assets/9aaa1ba3-8aa4-44d5-88be-c712a7549142" />
 
 ---
@@ -509,7 +506,6 @@ are detection dependencies, not just operational ones.
 > construction for `joshua.local/Administrator` signed with
 > krbtgt AES256 key. No DC interaction required for forgery.
 
-![Golden Ticket forge](./screenshots/golden-ticket-forge.png)
 <img width="472" height="262" alt="Golden Ticket Forged" src="https://github.com/user-attachments/assets/a1e8cde2-df29-4a51-be37-b53ca81c234f" />
 
 ---
@@ -521,7 +517,6 @@ are detection dependencies, not just operational ones.
 > `End Time: 10 hours`, `Flags: forwardable, renewable, initial`.
 > A forensically valid TGT.
 
-![describeTicket verified](./screenshots/describe-ticket-output.png)
 <img width="538" height="251" alt="Golden DescribeTicket" src="https://github.com/user-attachments/assets/8d7f650c-aa57-4b21-a545-b15412efcd1f" />
 
 ---
@@ -533,7 +528,6 @@ are detection dependencies, not just operational ones.
 > `SYSVOL`, `NETLOGON`, and all business shares.
 > Authentication: Kerberos only. Password: none.
 
-![DC share access](./screenshots/dc-share-access-golden-ticket.png)
 <img width="539" height="376" alt="Full DC Share Access" src="https://github.com/user-attachments/assets/dded24e1-0295-4b42-9506-6574810d2eba" />
 
 
@@ -545,7 +539,6 @@ are detection dependencies, not just operational ones.
 > across the full 1-hour window covering the DCSync attack.
 > DS Access auditing not configured — confirmed detection gap.
 
-![DCSync no 4662 events](./screenshots/kibana-no-4662-dcsync.png)
 <img width="642" height="659" alt="No event hit 4662" src="https://github.com/user-attachments/assets/e9ae43d1-8bf4-40f6-8aaa-d92431de21b3" />
 
 ---
@@ -558,7 +551,6 @@ are detection dependencies, not just operational ones.
 > `AuthenticationPackageName: Kerberos`, `LogonType: 3`,
 > `ElevatedToken: %%1842`. No preceding 4768 in the dataset.
 
-![Golden Ticket 4624 survivor](./screenshots/kibana-4624-golden-ticket-logon.png)
 <img width="640" height="702" alt="event 4624 kerberos" src="https://github.com/user-attachments/assets/a750ec93-8ac2-4586-8d1a-74c845b2459f" />
 
 ---
@@ -677,6 +669,6 @@ Phase4-DCSync-GoldenTicket/
 
 *Part of the Active Directory Attack & Defense Home Lab Series*
 
-[Phase 0](../Phase0) · [Phase 1](../Phase1) · [Phase 2](../Phase2) · [Phase 3](../Phase3) · **Phase 4** · [Phase 5](../Phase5)
+[Phase 0](../Phase-0-Visibility-Foundation) · [Phase 1](../Phase-1-Credential-Access) · [Phase 2](../Phase-2-Attack-Path-Mapping) · [Phase 3](../Phase-3-Lateral-Movement) · **Phase 4** · [Phase 5](../Phase-5-Detection-Engineering)
 
 </div>

@@ -206,13 +206,13 @@ The resulting Sysmon Event ID 1 landed **61 milliseconds** after the logon event
 
 | Phase | Focus | Status |
 |---|---|---|
-| [Phase 0](../phase-0-Visibility-Foundation) | Visibility Foundation (Sysmon, Winlogbeat, Audit Policy) | ✅ Complete |
-| [Phase 1](../phase-1-Credential-Access) | Credential Access (LLMNR, Spraying, Kerberoasting, AS-REP Roasting) | ✅ Complete |
-| [Phase 2](../phase-2-Attack-Path-Mapping) | Attack Path Mapping (BloodHound) | ✅ Complete |
-| **Phase 3** | **Lateral Movement & Escalation** | ✅ **Complete (this repo)** |
-| [Phase 4](../phase-4-DCSync-Golden-Ticket) | Persistence (DCSync & Golden Ticket) | ✅ Complete |
-| [Phase 5](../phase-5-) | Detection Engineering Write Up | ✅ Complete |
-| [Phase 6](../phase-6-Incident Report) | ✅ Complete |
+| [Phase 0](../Phase-0-Visibility-Foundation) | Visibility Foundation (Sysmon, Winlogbeat, Audit Policy) | ✅ Complete |
+| [Phase 1](../Phase-1-Credential-Access) | Credential Access (LLMNR, Spraying, Kerberoasting, AS-REP Roasting) | ✅ Complete |
+| [Phase 2](../Phase-2-Attack-Path-Mapping) | Attack Path Mapping (BloodHound) | ✅ Complete |
+| **Phase 3** | **Lateral Movement & Escalation** | ✅ **Complete (this phase)** |
+| [Phase 4](../Phase-4-DCSync-Golden-Ticket) | Persistence (DCSync & Golden Ticket) | ✅ Complete |
+| [Phase 5](../Phase-5-Detection-Engineering) | Detection Engineering Write Up | ✅ Complete |
+| [Phase 6](../Phase-6-Incident-Report) | Incident Report | ✅ Complete |
 
 ---
 

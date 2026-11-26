@@ -103,12 +103,20 @@ field — the alert query targets `message` not `event_data.Properties`
 for this reason. Always verify field names from actual captured events,
 not documentation.
 
-**Step 5 — Build a live Kibana alert rule.**
+**Step 5: Build a live Kibana alert rule.**
 
 Stack Management → Rules → Create rule → Elasticsearch query → KQL or Lucene:
 
+What I originally built (this query never matches, see the correction below):
+
 ```
 event.code:4662 and message:*1131f6ad-9c07-11d1-f79f-00c04fc2dcd2*
+```
+
+The corrected rule:
+
+```
+event.code:4662 and message:"1131f6ad-9c07-11d1-f79f-00c04fc2dcd2" and not winlog.event_data.SubjectUserName:*$
 ```
 
 | Setting | Value |
@@ -116,7 +124,7 @@ event.code:4662 and message:*1131f6ad-9c07-11d1-f79f-00c04fc2dcd2*
 | Index | winlogbeat-* |
 | Threshold | IS ABOVE 0 |
 | Check every | 5 minutes |
-| Look back | 5 minutes |
+| Look back | 15 minutes (originally 5) |
 | Action | Server log connector |
 
 
@@ -124,20 +132,29 @@ event.code:4662 and message:*1131f6ad-9c07-11d1-f79f-00c04fc2dcd2*
 
 
 
-**Step 6 — Validate the rule fired.**
+**Step 6: Validate the rule fired.**
 
 Re-ran DCSync. After one check interval:
 
 ```
-Last response: Succeeded ✅
-Success ratio: 100% ✅
+Last response: Succeeded
+Success ratio: 100%
 ```
 
-The rule evaluated, matched the attack events, and executed the action
-— not just a saved query, but a confirmed firing detection.
+I originally wrote that this proved the rule matched the attack. It didn't.
 
-<img width="1279" height="731" alt="Kibana Alert Rule Fired" src="https://github.com/user-attachments/assets/02065ff5-c0df-46b5-9cb4-794212869af8" />
+<img width="1279" height="731" alt="Kibana Alert Rule" src="https://github.com/user-attachments/assets/02065ff5-c0df-46b5-9cb4-794212869af8" />
 
+#### Correction (November 2026)
+
+"Succeeded" only means the rule ran without an error. Whether it matched anything shows in the **Active alerts** count, and in November I found this rule had raised **0 alerts in 57 runs**. Two things were wrong:
+
+1. **The wildcard query can never match.** `message` is a text field, so Elasticsearch splits it into words at every hyphen before storing it. A wildcard is checked against one word at a time, and no single word contains the hyphenated GUID. Searching the GUID as a quoted phrase fixed it: on the same day's events, the wildcard query returned 0 hits and the phrase query returned 2.
+2. **A 5-minute look-back is too tight.** If events arrive late, they're already outside the window when the rule runs. I moved it to 15 minutes.
+
+With both fixed, the rule raised a real alert about a minute after a DCSync run on 25 November 2026. The full investigation is in [Purple-Team-Automation](https://github.com/joshuagodwin7929/Purple-Team-Automation/blob/main/validation/detection-results.md), and the rule definition is in [Detection-Engineering](https://github.com/joshuagodwin7929/Detection-Engineering/blob/main/rules/elastic/LAB-OVERRIDES.md).
+
+The audit setup in steps 1 to 4 was right all along. The 4662 events were in Elastic; only the rule on top of them was broken.
 
 #### Detection note
 

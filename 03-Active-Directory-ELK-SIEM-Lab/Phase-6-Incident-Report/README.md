@@ -185,12 +185,12 @@ Both are protocol-level abuses that host-based Sysmon logging is structurally no
 
 | Phase | Focus | Link |
 |-------|-------|------|
-| Phase 0 | ELK Stack, Sysmon, Winlogbeat | [View →](../Phase0) |
-| Phase 1 | LLMNR, Kerberoasting, AS-REP Roasting | [View →](../Phase1) |
-| Phase 2 | BloodHound Enumeration | [View →](../Phase2) |
-| Phase 3 | Lateral Movement, GPO Abuse | [View →](../Phase3) |
-| Phase 4 | DCSync, Golden Ticket | [View →](../Phase4) |
-| Phase 5 | Detection Engineering, KQL, Dashboard | [View →](../Phase5) |
+| Phase 0 | ELK Stack, Sysmon, Winlogbeat | [View →](../Phase-0-Visibility-Foundation) |
+| Phase 1 | LLMNR, Kerberoasting, AS-REP Roasting | [View →](../Phase-1-Credential-Access) |
+| Phase 2 | BloodHound Enumeration | [View →](../Phase-2-Attack-Path-Mapping) |
+| Phase 3 | Lateral Movement, GPO Abuse | [View →](../Phase-3-Lateral-Movement) |
+| Phase 4 | DCSync, Golden Ticket | [View →](../Phase-4-DCSync-Golden-Ticket) |
+| Phase 5 | Detection Engineering, KQL, Dashboard | [View →](../Phase-5-Detection-Engineering) |
 
 ---
 
