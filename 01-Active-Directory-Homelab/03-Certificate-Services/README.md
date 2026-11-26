@@ -1,480 +1,92 @@
 # Active Directory Certificate Services (AD CS)
 
-> Enterprise-style Public Key Infrastructure (PKI) implementation within an Active Directory environment, demonstrating certificate authority deployment, certificate issuance, trust management, certificate templates, and troubleshooting of certificate enrollment.
+Part of the [Active Directory Homelab](../) series.
 
-**Parent Project:** [← Active Directory Homelab](../)
+In this module I stood up an internal PKI with Active Directory Certificate Services: an Enterprise Root CA, a certificate template, and autoenrollment, ending with a Windows 10 client holding a certificate issued by my own CA. Getting there meant working through three real enrollment problems (template permissions, Group Policy autoenrollment, and trust propagation), which was the useful part.
 
----
-
-## Project Overview
-
-This module implements **Active Directory Certificate Services (AD CS)** within the Active Directory homelab.
-
-The objective was to deploy an internal Enterprise Root Certification Authority (CA), configure certificate issuance, establish trust between the CA and domain-joined systems, and issue a certificate to a Windows 10 client.
-
-The project also involved troubleshooting real certificate enrollment issues involving **certificate template permissions, Group Policy autoenrollment, and certificate trust propagation**.
-
----
-
-# 1. What Did I Build?
-
-I built an internal **Public Key Infrastructure (PKI)** using Active Directory Certificate Services.
-
-The implementation included:
-
-- An **Enterprise Root Certification Authority**
-- Certificate authority configuration and cryptographic settings
-- A certificate template for certificate enrollment
-- Certificate issuance to a domain-joined Windows 10 client
-- Certificate trust validation
-- Certificate inspection using the Windows Certificates MMC snap-in
-- Group Policy-based certificate autoenrollment
-
-### Environment
+## The environment
 
 | Component | Configuration |
 |---|---|
-| **Certificate Authority** | `JOSHUA-SERVER2022-CA` |
-| **CA Server** | `JOSHUA-SERVER2022` |
-| **CA Type** | Enterprise Root CA |
-| **Client** | Windows 10 |
-| **Key Length** | 2048-bit |
-| **Hash Algorithm** | SHA-256 |
-| **Key Storage Provider** | Microsoft Software Key Storage Provider |
-| **Management Tool** | `certlm.msc` |
+| Certificate Authority | `JOSHUA-SERVER2022-CA` |
+| CA server | `JOSHUA-SERVER2022` |
+| CA type | Enterprise Root CA |
+| Client | Windows 10 |
+| Key length | 2048-bit RSA |
+| Hash | SHA-256 |
+| Key storage | Microsoft Software Key Storage Provider |
+| Management tool | `certlm.msc` |
 
-### Result
+I wanted to understand how organizations use an internal CA to establish trust, because from a SOC seat PKI shows up constantly: enrollment failures, expired certificates, broken trust chains, TLS events, and misconfigured or over-permissioned certificate templates. This module pushes the lab beyond identity into certificate and trust infrastructure.
 
-The Windows 10 client successfully enrolled for a certificate issued by the internal Enterprise Root CA.
+## How I built it
 
-The certificate was verified through the Windows certificate management interface, confirming the certificate chain and cryptographic configuration.
+**Install AD CS.** I added the Active Directory Certificate Services role to `JOSHUA-SERVER2022` and configured it as an Enterprise Root CA.
 
----
+**Configure the CA.** I set the CA name, validity period, a 2048-bit RSA key, SHA-256 hashing, and the Microsoft Software Key Storage Provider. The result was `JOSHUA-SERVER2022-CA`.
 
-# 2. Why Did I Build It?
+**Create a certificate template.** I made a template to control enrollment, with Read, Enroll, and (where applicable) Autoenroll permissions scoped to the intended entities.
 
-The purpose of this module was to understand how organizations use **internal certificate authorities and PKI** to establish trust and support certificate-based security.
+**Enable autoenrollment via Group Policy.** Under Computer Configuration → Policies → Windows Settings → Security Settings → Public Key Policies → Certificate Services Client - Auto-Enrollment, then refreshed the client with `gpupdate /force`.
 
-The project was designed to provide practical experience with:
+**Validate.** I inspected the issued certificate in `certlm.msc`, checking the chain, the issuing CA, the RSA key, and the key storage provider.
 
-- Certificate authorities
-- Digital certificates
-- Certificate templates
-- Certificate enrollment
-- Trust chains
-- Certificate-based authentication concepts
-- Group Policy certificate autoenrollment
-- Certificate troubleshooting
+## What went wrong
 
-From a security operations perspective, understanding PKI is important when investigating:
+**Template permissions.** The client couldn't enroll at first. The template's security permissions weren't set correctly, so I added the right group and granted Read, Enroll, and Autoenroll where applicable. Enrollment depends not just on a template existing but on its permissions being right.
 
-- Certificate enrollment failures
-- Expired certificates
-- Trust chain problems
-- TLS-related security events
-- Certificate-based authentication issues
-- Misconfigured certificate templates
-- Unauthorized certificate enrollment
+**Autoenrollment still didn't fire.** Even with the template fixed, automatic enrollment didn't happen. It was Group Policy: autoenrollment has to be explicitly enabled under Public Key Policies → Certificate Services Client - Auto-Enrollment. After enabling it and running `gpupdate /force`, the client enrolled. Enrollment can depend on several layers, so when troubleshooting I learned to check both template permissions and GPO.
 
-This module therefore extends the Active Directory lab beyond identity management into **enterprise certificate and trust infrastructure**.
+**Broken trust chain.** A certificate first showed a broken trust path, because the root CA certificate hadn't propagated to the client's Trusted Root Certification Authorities yet. Refreshing Group Policy and rechecking the trust path resolved it. Trust depends on the client being able to build a valid chain back to a CA it trusts.
 
----
+## Evidence
 
-# 3. What Technologies Did I Use?
-
-| Technology | Purpose |
-|---|---|
-| **Windows Server** | Hosted the Certificate Authority |
-| **Active Directory Certificate Services** | Provided internal PKI and certificate issuance |
-| **Enterprise Root CA** | Established the internal certificate trust hierarchy |
-| **Active Directory** | Provided the domain environment and integration with AD CS |
-| **Windows 10** | Domain-joined certificate enrollment client |
-| **Group Policy** | Configured certificate autoenrollment |
-| **Certificate Templates** | Defined certificate enrollment and permissions |
-| **Certificates MMC (`certlm.msc`)** | Validated certificates installed on the client |
-| **RSA** | Certificate public-key cryptography |
-| **SHA-256** | Certificate hashing/signature algorithm |
-| **Microsoft Software Key Storage Provider** | Provided cryptographic key storage |
-
----
-
-# 4. How Did I Build It?
-
-The implementation was completed in several stages.
-
-## Step 1: Install Active Directory Certificate Services
-
-The **AD CS** server role was installed on:
-
-```text
-JOSHUA-SERVER2022
-```
-
-The server was configured to operate as an:
-
-```text
-Enterprise Root Certification Authority
-```
-
----
-
-## Step 2: Configure the Certification Authority
-
-The CA was configured with:
-
-- CA name
-- Certificate validity period
-- 2048-bit RSA key
-- SHA-256 hashing
-- Microsoft Software Key Storage Provider
-
-The resulting CA was:
-
-```text
-JOSHUA-SERVER2022-CA
-```
-
----
-
-## Step 3: Configure a Certificate Template
-
-A certificate template was configured to control certificate enrollment.
-
-The template configuration included appropriate security permissions for the intended enrollment entities.
-
-The relevant permissions included:
-
-- Read
-- Enroll
-- Autoenroll where applicable
-
----
-
-## Step 4: Configure Certificate Enrollment
-
-The Windows 10 client was configured to obtain a certificate from the internal CA.
-
-Certificate enrollment was tested both through the configured certificate infrastructure and through Group Policy-based autoenrollment.
-
----
-
-## Step 5: Configure Group Policy Autoenrollment
-
-Certificate autoenrollment was enabled through:
-
-```text
-Computer Configuration
-└── Policies
-    └── Windows Settings
-        └── Security Settings
-            └── Public Key Policies
-                └── Certificate Services Client - Auto-Enrollment
-```
-
-The client policy was then refreshed using:
-
-```text
-gpupdate /force
-```
-
----
-
-## Step 6: Validate Certificate Issuance
-
-The client certificate was inspected using:
-
-```text
-certlm.msc
-```
-
-The certificate was verified for:
-
-- Successful issuance
-- Certificate chain
-- Issuing CA
-- RSA cryptography
-- Microsoft Software Key Storage Provider
-
----
-
-# 5. What Security Concepts Did I Demonstrate?
-
-This module demonstrates several important enterprise security concepts.
-
-### Public Key Infrastructure
-
-- Certificate Authorities
-- Digital certificates
-- Trust relationships
-- Certificate chains
-- Internal PKI
-
-### Identity & Authentication
-
-- Certificate-based identity
-- Certificate enrollment
-- Certificate trust
-- Domain-integrated certificate services
-
-### Access Control
-
-- Certificate template permissions
-- Read permissions
-- Enroll permissions
-- Autoenrollment permissions
-
-### Policy Enforcement
-
-- Group Policy
-- Automated certificate enrollment
-- Centralized certificate configuration
-
-### Cryptography
-
-- RSA public-key cryptography
-- 2048-bit keys
-- SHA-256
-- Cryptographic key storage
-
-### Security Operations
-
-The implementation also provides practical context for investigating:
-
-- Certificate enrollment failures
-- Broken certificate trust chains
-- Certificate template misconfiguration
-- Autoenrollment failures
-- TLS and certificate-related security events
-
----
-
-# 6. What Did I Learn?
-
-This project demonstrated that certificate services are not an isolated Windows Server feature. They depend on multiple components working together correctly.
-
-## Certificate Template Permissions
-
-The Windows client initially could not enroll for the certificate.
-
-Investigation showed that the relevant security permissions were not configured correctly on the certificate template.
-
-The issue was resolved by adding the appropriate group to the template security configuration and granting:
-
-```text
-Read
-Enroll
-Autoenroll
-```
-
-where applicable.
-
-### Lesson
-
-Certificate enrollment depends not only on the existence of a certificate template, but also on correctly configured permissions.
-
----
-
-## Group Policy Autoenrollment
-
-After correcting the certificate template permissions, automatic enrollment still did not occur.
-
-The issue was traced to Group Policy.
-
-Certificate autoenrollment needed to be explicitly enabled through:
-
-```text
-Computer Configuration
-→ Policies
-→ Windows Settings
-→ Security Settings
-→ Public Key Policies
-→ Certificate Services Client - Auto-Enrollment
-```
-
-After enabling the policy and running:
-
-```text
-gpupdate /force
-```
-
-the client successfully enrolled for the certificate.
-
-### Lesson
-
-Certificate enrollment can depend on several configuration layers. When troubleshooting, it is important to verify both certificate template permissions and Group Policy configuration.
-
----
-
-## Certificate Trust Chain
-
-A certificate initially displayed a broken trust path warning on the client.
-
-The root CA certificate had not yet propagated to the client's:
-
-```text
-Trusted Root Certification Authorities
-```
-
-The issue was resolved after refreshing Group Policy and rechecking the certificate trust path.
-
-### Lesson
-
-Certificate trust depends on the client being able to establish a valid chain back to a trusted Certification Authority.
-
----
-
-# 7. What Would I Improve?
-
-The current implementation establishes a functional internal PKI foundation, but there are several areas I would expand in a production-oriented version of the lab.
-
-### Planned Improvements
-
-- Add additional certificate templates for different use cases
-- Expand certificate autoenrollment scenarios
-- Document certificate template security in greater detail
-- Test certificate renewal and expiration
-- Test certificate revocation
-- Investigate Certificate Revocation Lists (CRLs)
-- Explore Online Certificate Status Protocol (OCSP)
-- Test certificate-based authentication scenarios
-- Monitor certificate-related Windows events
-- Integrate certificate events into the security monitoring environment
-- Map relevant certificate-related activity to MITRE ATT&CK where appropriate
-
-### Security Improvement
-
-A future iteration could also focus more heavily on **certificate template security**, particularly understanding how excessive enrollment permissions could introduce security risks within an Active Directory environment.
-
-This would allow the lab to progress from simply deploying PKI to actively **assessing and monitoring PKI security**.
-
----
-
-# 8. What Evidence Do I Have?
-
-The implementation is supported by screenshots documenting the major configuration and validation stages.
-
-Evidence is organized separately from the documentation:
-
-```text
-03-Certificate-Services/
-├── README.md
-└── evidence/
-    ├── 01-active-directory-certificate-service-role.png
-    ├── 02-active-directory-certificate-service-root-ca.png
-    ├── 03-active-directory-certificate-service-configuration.png
-    ├── 04-active-directory-ou-structure.png
-    ├── 05-active-directory-certificate-service-role-certificate.png
-    ├── 06-ad-certificate-autoenrollment-policy-enabled.png
-    ├── 07-active-directory-certificate-template.png
-    └── 08-active-directory-certificate-commands.png
-```
-
-## AD CS role installation
-
-Selecting the Active Directory Certificate Services role in the Add Roles and Features wizard.
+**Selecting the AD CS role in the Add Roles and Features wizard**
 
 ![AD CS role installation](./evidence/01-active-directory-certificate-service-role.png)
 
----
-
-## Enterprise Root CA
-
-Choosing Root CA as the CA type.
+**Choosing Root CA as the CA type**
 
 ![Root CA selected](./evidence/02-active-directory-certificate-service-root-ca.png)
 
----
-
-## CA configuration
-
-The confirmation page: Enterprise Root CA, RSA 2048-bit key, SHA256, five-year validity.
+**The confirmation page: Enterprise Root CA, RSA 2048-bit, SHA256, five-year validity**
 
 ![CA configuration summary](./evidence/03-active-directory-certificate-service-configuration.png)
 
----
+**The OU structure the CA integrates with**
 
-## Custom certificate template
+![OU structure](./evidence/04-active-directory-ou-structure.png)
 
-The "Joshua Homelab Certificate" template published on the CA, for server and client authentication.
+**The "Joshua Homelab Certificate" template published on the CA, for server and client authentication**
 
 ![Certificate templates](./evidence/07-active-directory-certificate-template.png)
 
----
-
-## Autoenrollment policy
-
-The Group Policy setting that turns on certificate autoenrollment for domain members.
+**The Group Policy setting that turns on certificate autoenrollment for domain members**
 
 ![Autoenrollment policy enabled](./evidence/06-ad-certificate-autoenrollment-policy-enabled.png)
 
----
-
-## Triggering enrollment
-
-Forcing a policy refresh with `gpupdate /force` and enrollment with `certutil -pulse`. The first attempt failed because I typed `cerutil`; the second worked.
+**Forcing a policy refresh with `gpupdate /force` and enrollment with `certutil -pulse`. The first attempt failed because I typed `cerutil`; the second worked.**
 
 ![gpupdate and certutil -pulse](./evidence/08-active-directory-certificate-commands.png)
 
----
-
-## Issued certificate
-
-A certificate issued by `Joshua-JOSHUA-SERVER20-CA`, shown in the Certification Authority console.
+**A certificate issued by `Joshua-JOSHUA-SERVER20-CA`, shown in the Certification Authority console**
 
 ![Issued certificate](./evidence/05-active-directory-certificate-service-role-certificate.png)
 
-> **Evidence is included to demonstrate the actual implementation and validation of the environment rather than simply documenting theoretical configuration steps.**
+## What I'd do next
 
----
+The current setup is a working PKI foundation. In a more production-oriented version I'd add templates for different use cases, test certificate renewal, expiration and revocation (CRLs and OCSP), test certificate-based authentication, and pull certificate-related Windows events into my monitoring. I'd also spend more time on certificate template security specifically, since over-permissioned enrollment rights are a real attack surface in AD. That would move the lab from deploying PKI to assessing and monitoring it.
 
-# ✅ Validation Summary
-
-| Validation | Result |
-| --- | --- |
-| AD CS role installed | Passed |
-| Enterprise Root CA configured | Passed |
-| Certificate template configured | Passed |
-| Certificate template permissions validated | Passed |
-| Group Policy autoenrollment configured | Passed |
-| Windows 10 client enrollment | Passed |
-| Certificate visible in `certlm.msc` | Passed |
-| Certificate trust validated | Passed |
-| RSA / SHA-256 configuration verified | Passed |
-
----
-
-# Key Takeaways
-
-This project provided hands-on experience implementing and troubleshooting an internal PKI environment using Active Directory Certificate Services.
-
-The most important lessons were:
-
-1. **Certificate enrollment depends on correctly configured template permissions.**
-2. **Group Policy plays an important role in automated certificate enrollment.**
-3. **Certificate trust depends on a valid chain to a trusted root CA.**
-4. **PKI troubleshooting requires examining multiple infrastructure layers rather than assuming the CA itself is the problem.**
-5. **Certificate services integrate closely with Active Directory, Group Policy, and domain clients.**
-6. **Understanding PKI is valuable when investigating authentication, TLS, and certificate-related security events.**
-
----
-
-# Related Modules
+## Related modules
 
 | Module | Description |
-| --- | --- |
-| 01: Core Infrastructure | Active Directory, DNS, and DHCP infrastructure |
-| 02: Users & OUs | Users, groups, and Organizational Unit structure |
-| **03: Certificate Services** | Internal PKI and certificate management |
-| 04: Client Domain Join | Windows client domain integration |
-| 05: Group Policies | Centralized security and configuration policies |
-| 06: File Server & Shares | Department shares and NTFS permissions |
+|---|---|
+| [01: Core Infrastructure](../01-Core-Infrastructure/) | AD, DNS, and DHCP |
+| [02: Users & OUs](../02-Users-And-OUs/) | Users, groups, and OU structure |
+| [04: Client Domain Join](../04-Client-Domain-Join/) | Joining Windows clients to the domain |
+| [05: Group Policies](../05-Group-Policies/) | Centralized security and configuration |
+| [06: File Server & Shares](../06-File-Server-Shares/) | Department shares and NTFS permissions |
 
 ---
 
-## Project Summary
-
-**Active Directory • PKI • Certificate Services • Authentication • Trust • Group Policy**
-
-This module demonstrates the practical implementation of an internal Public Key Infrastructure using Active Directory Certificate Services, including CA deployment, certificate issuance, certificate template management, automated enrollment, trust validation, and troubleshooting.
-
-The project demonstrates not only the ability to configure certificate services, but also the ability to **investigate failures, identify root causes, implement corrective actions, and validate the resulting security infrastructure.**
+[← Back to Active Directory Homelab](../)

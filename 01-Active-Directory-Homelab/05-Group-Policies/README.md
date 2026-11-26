@@ -2,89 +2,54 @@
 
 Part of the [Active Directory Homelab](../) series.
 
-## Objective
-Enforce consistent security, usability, and access standards across all 
-users and devices in the domain using Group Policy.
+I used Group Policy to enforce consistent security, usability and access settings across the domain. Five policies, each with its purpose below.
 
-## Password Policy
-- Configured via the Default Domain Policy GPO
-- Set minimum password length: **12 Characters** (According to NIST SP 800-63B, this is the value
-  most current security Baselines, and CIS Benchmark)
-- Complexity requirements: **Enabled**
-- Maximum password age: **90 days** (According to NIST SP 800-63B, No Mandatory Expiration)
-- Minimum Password age: **1 day**
-- Enforced Password History: **5 Passwords Remembered**
-- <img width="580" height="399" alt="SPassword Policy GPO" src="https://github.com/user-attachments/assets/04fd713a-fcca-4915-b717-b485c1aced33" />
+## Password policy
 
+Set in the Default Domain Policy:
 
+- Minimum length: 12 characters (in line with NIST SP 800-63B and the CIS Benchmark)
+- Complexity requirements: enabled
+- Maximum password age: 90 days (NIST SP 800-63B leans against mandatory expiration, but I set one here)
+- Minimum password age: 1 day
+- Password history: 5 remembered
 
-## Account Lockout Policy
-- What I Configured:
-- Account Lockout threshold: **5 invalid login attempts**
-- Account Lockout Duration: **20 minutes**
-- Account reset counter: **15 minutes**
-- **Purpose:** mitigate brute-force login attempts against domain accounts
-- <img width="578" height="394" alt="Account Lockout Policy" src="https://github.com/user-attachments/assets/bd822bf7-bc22-471d-88c5-003f0a1f56ad" />
+<img width="580" height="399" alt="Password Policy GPO" src="https://github.com/user-attachments/assets/04fd713a-fcca-4915-b717-b485c1aced33" />
 
+## Account lockout policy
 
-## Desktop Wallpaper GPO
-- Deployed a standardized desktop wallpaper across all domain-joined 
-  machines via **Group Policy Management > User Configuration > Policies > Administrative 
-  Templates > Desktop**
-- **Purpose:** enforce visual branding/consistency and reduce helpdesk 
-  "cosmetic" support tickets
-- <img width="586" height="494" alt="Desktop Wallpaper GPO" src="https://github.com/user-attachments/assets/96062ba1-8de0-414e-84cf-f750a8537f04" />
-- <img width="1175" height="678" alt="GPO Wallpaper" src="https://github.com/user-attachments/assets/e32f752f-64df-417c-ae43-561c8eb9f683" />
+To slow brute-force attempts against domain accounts:
 
+- Lockout threshold: 5 invalid attempts
+- Lockout duration: 20 minutes
+- Reset counter: 15 minutes
 
-## Disable USB Storage GPO
-- Blocked removable storage devices via **Computer Configuration > 
-  Policies > Administrative Templates > System > Removable Storage Access**
-- **Purpose:** reduce data exfiltration risk and unauthorized software 
-  introduction via removable media, a common vector reviewed in 
-  security hardening
-- <img width="682" height="451" alt="Screenshot 2026-07-24 045457" src="https://github.com/user-attachments/assets/5f26df50-fbb9-435b-a218-0c1afa398596" />
+<img width="578" height="394" alt="Account Lockout Policy" src="https://github.com/user-attachments/assets/bd822bf7-bc22-471d-88c5-003f0a1f56ad" />
 
+## Desktop wallpaper
 
-## Map Network Drive GPO
-- Configured Group Policy Preferences to automatically map 5 department 
-  drives on user login, scoped by OU/security group so each department 
-  only sees its own share
-- <img width="584" height="406" alt="image" src="https://github.com/user-attachments/assets/f734cdbe-e3f9-4ecb-b2d8-86d23e57165c" />
-- <img width="538" height="323" alt="Screenshot 2026-06-17 150300" src="https://github.com/user-attachments/assets/f20b8eaa-d46f-43a2-adc4-3c1ebbb304a4" />
+A standard wallpaper pushed to all domain-joined machines through User Configuration → Policies → Administrative Templates → Desktop, for visual consistency and fewer cosmetic helpdesk tickets.
 
+<img width="586" height="494" alt="Desktop Wallpaper GPO" src="https://github.com/user-attachments/assets/96062ba1-8de0-414e-84cf-f750a8537f04" />
+<img width="1175" height="678" alt="GPO Wallpaper" src="https://github.com/user-attachments/assets/e32f752f-64df-417c-ae43-561c8eb9f683" />
 
+## Disable USB storage
 
+Blocked removable storage through Computer Configuration → Policies → Administrative Templates → System → Removable Storage Access, to cut the risk of data exfiltration and unauthorized software coming in on removable media.
 
-## What This Demonstrates
-Hands-on application of the principle of least privilege and endpoint 
-hardening through policy enforcement, skills directly relevant to 
-reviewing GPO-based controls during a security assessment or incident 
-investigation.
+<img width="682" height="451" alt="Disable USB storage GPO" src="https://github.com/user-attachments/assets/5f26df50-fbb9-435b-a218-0c1afa398596" />
 
-## Notes / Lessons Learned
+## Map network drives
 
-**GPO conflict (competing settings):** Two GPOs ended up applying 
-conflicting settings to the same OU, the mapped network drive policy 
-was being overridden by another GPO linked higher in the OU hierarchy 
-with a different drive letter assignment. Since GPOs apply in a defined 
-order (Local > Site > Domain > OU, with later-applied policies winning 
-by default), the higher-level GPO was taking precedence. Resolved by 
-reviewing GPO precedence and either adjusting the link order or 
-enforcing the correct GPO so the intended settings actually took effect 
-for the target OU.
+Group Policy Preferences to map the 5 department drives at login, scoped by OU and security group so each department only sees its own share.
 
-**Policy not applying immediately:** After creating and linking a new 
-GPO, the client machine wasn't reflecting the change right away, 
-Group Policy only refreshes on its own periodically (or at logon/reboot 
-by default), so waiting for a natural refresh wasn't practical for 
-testing. So, ran `gpupdate /force` on the client to trigger an immediate 
-policy refresh, and used the Group Policy Results report (`gpresult /h 
-report.html` or via the GPMC) to confirm exactly which GPOs were 
-applying, in what order, and to catch cases where a setting wasn't 
-being applied due to conflict or scope.
+<img width="584" height="406" alt="Map network drive GPO" src="https://github.com/user-attachments/assets/f734cdbe-e3f9-4ecb-b2d8-86d23e57165c" />
+<img width="538" height="323" alt="Mapped drives result" src="https://github.com/user-attachments/assets/f20b8eaa-d46f-43a2-adc4-3c1ebbb304a4" />
 
-This reinforced that Group Policy troubleshooting is less about the 
-individual setting and more about understanding precedence and scope, 
-`gpresult` became the go-to tool for diagnosing why an expected policy 
-wasn't taking effect.
+## What went wrong
+
+**Two GPOs fought over the same setting.** My mapped-drive policy was being overridden by another GPO linked higher in the OU hierarchy that assigned a different drive letter. GPOs apply in order (Local, Site, Domain, OU, with later policies winning by default), so the higher-level one was taking precedence. I sorted it by reviewing GPO precedence and adjusting the link order so the intended settings actually applied to the target OU.
+
+**A new policy didn't apply right away.** After linking a GPO, the client didn't reflect the change immediately, because Group Policy only refreshes periodically or at logon/reboot. Waiting wasn't practical for testing, so I ran `gpupdate /force` on the client and used the Group Policy Results report (`gpresult /h report.html`, or through the GPMC) to see exactly which GPOs were applying, in what order, and where a setting wasn't taking effect because of a conflict or scope.
+
+The main thing I took away is that GPO troubleshooting is less about the individual setting and more about precedence and scope. `gpresult` became my go-to for working out why an expected policy wasn't applying, which is the same skill I'd use reviewing GPO-based controls during a security assessment.

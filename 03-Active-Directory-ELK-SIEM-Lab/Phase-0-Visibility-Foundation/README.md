@@ -1,57 +1,20 @@
-# Phase 0: Visibility Foundation: Building the Eyes Before the Fists
+# Phase 0: Visibility Foundation
 
-Part of a multi-phase Active Directory attack/defense home lab. This phase focused entirely on building detection visibility across a small AD environment (Domain Controller + Windows 10 endpoint) **before** any attack simulation began, feeding Sysmon, PowerShell, and Windows Security telemetry into the self-hosted Elastic Stack SIEM built in [SIEM-Lab-ELK-Stack](../../02-SIEM-Lab-ELK-Stack).
+Before I attacked anything, I wanted to know whether my domain could answer one question: who logged into what, and when? This phase is the logging I set up on the domain controller and the Windows 10 client to answer it, shipped into the Elastic Stack I built in my [SIEM lab](../../02-SIEM-Lab-ELK-Stack).
 
-> You can't detect what you can't see. Before running a single attack technique, this phase proves the domain can answer a basic question: *who logged into what, and when?*
+If I'd skipped this and gone straight to attacks, I'd have had no way to tell whether any of them were detectable.
 
----
+## What I set up
 
-## Table of Contents
-
-- [What Did I Build?](#what-did-i-build)
-- [Why Did I Build It?](#why-did-i-build-it)
-- [What Technologies?](#what-technologies)
-- [Architecture](#architecture)
-- [How Did I Build It?](#how-did-i-build-it)
-- [What Security Concepts?](#what-security-concepts)
-- [What Did I Learn?](#what-did-i-learn)
-- [What Would I Improve?](#what-would-i-improve)
-- [What Evidence Do I Have?](#what-evidence-do-i-have)
-- [Screenshots](#screenshots)
-- [Roadmap](#roadmap)
-
----
-
-## What Did I Build?
-
-A domain-wide logging and telemetry pipeline across an Active Directory environment, shipping real-time endpoint and security event data into a self-hosted SIEM:
-
-- **Sysmon** deployed on both the Domain Controller and a Windows 10 endpoint, capturing process creation, DNS queries, file activity, and more
-- **PowerShell Script Block and Module Logging** enabled domain-wide via Group Policy
-- **Advanced Audit Policy** configured across four categories: Logon/Logoff, Kerberos authentication, Account Management, and Object Access
-- A **SACL (System Access Control List)** on a sensitive file share to audit file creation/deletion, paired with a **canary token** file as an independent tripwire
-- **Winlogbeat** shipping all of the above from both hosts into Elasticsearch, over TLS
-- A validated, searchable **Kibana** view proving the whole pipeline works end to end
-
-## Why Did I Build It?
-
-Every later phase of this lab, credential attacks, lateral movement, persistence, depends on being able to see what happened afterward. Skipping straight to offense without instrumenting the environment first would mean generating attacks with no way to evaluate whether they were actually detectable. This phase exists to answer one question before anything else: **if a real attacker logged onto this domain right now, would I see it?**
-
-This also mirrors how real SOC/detection engineering work is structured, visibility engineering and log source onboarding come before detection rule-writing, which comes before threat hunting.
-
-## What Technologies?
-
-| Category | Tools |
+| Piece | Tool |
 |---|---|
-| Endpoint telemetry | Sysmon (SwiftOnSecurity config) |
-| Script logging | Windows PowerShell Script Block & Module Logging |
-| Audit policy | Windows Advanced Audit Policy Configuration (GPO) |
-| Log shipping | Winlogbeat 8.12.0 |
-| SIEM backend | Elasticsearch & Kibana 8.12.0 (self-hosted, see [SIEM-Lab-ELK-Stack](../../02-SIEM-Lab-ELK-Stack)) |
-| Environment | Windows Server domain controller, Windows 10 domain-joined endpoint |
-| Deception | Canary token file on a monitored file share |
-
-## Architecture
+| Endpoint telemetry | Sysmon with the SwiftOnSecurity config |
+| Script logging | PowerShell Script Block and Module Logging |
+| Audit policy | Advanced Audit Policy through Group Policy |
+| A tripwire | A SACL and a canary token on a file share |
+| Shipping | Winlogbeat 8.12.0 |
+| SIEM | Elasticsearch and Kibana 8.12.0 |
+| Hosts | Domain controller `Joshua-Server2022`, Windows 10 client `MY-LAB-PC` |
 
 ```
 ┌────────────────────┐        ┌────────────────────┐
@@ -78,23 +41,23 @@ This also mirrors how real SOC/detection engineering work is structured, visibil
                      └─────────────────────┘
 ```
 
-## How Did I Build It?
+## How I built it
 
-### 1. Sysmon Deployment
-Installed on both hosts using [SwiftOnSecurity's sysmon-config](https://github.com/SwiftOnSecurity/sysmon-config), a curated, single-file baseline tuned to surface attacker-relevant behavior while filtering routine Windows noise.
+### Sysmon
+
+I installed Sysmon on both hosts with [SwiftOnSecurity's sysmon-config](https://github.com/SwiftOnSecurity/sysmon-config), which keeps the attacker-relevant events and filters out most of the routine Windows noise.
+
 ```powershell
 .\Sysmon64.exe -accepteula -i sysmonconfig-export.xml
 ```
-Verified via `sc query sysmon64` and confirmed events appearing under `Applications and Services Logs > Microsoft > Windows > Sysmon > Operational`.
 
-### 2. PowerShell Logging (GPO)
-Enabled under **Computer Configuration > Administrative Templates > Windows Components > Windows PowerShell**:
-- Turn on Module Logging (`*`)
-- Turn on PowerShell Script Block Logging
+I checked it with `sc query sysmon64` and confirmed events were landing in `Applications and Services Logs > Microsoft > Windows > Sysmon > Operational`.
 
-Validated by generating PowerShell activity and confirming **Event IDs 4103 and 4104** in the PowerShell Operational log.
+### PowerShell logging
 
-### 3. Advanced Audit Policy (GPO)
+In Group Policy, under **Computer Configuration > Administrative Templates > Windows Components > Windows PowerShell**, I turned on Module Logging (`*`) and Script Block Logging. Then I ran some PowerShell and confirmed Event IDs 4103 and 4104 in the PowerShell Operational log.
+
+### Advanced Audit Policy
 
 | Category | Subcategories | Event IDs |
 |---|---|---|
@@ -103,13 +66,18 @@ Validated by generating PowerShell activity and confirming **Event IDs 4103 and 
 | Account Management | User Account Management, Security Group Management | 4720, 4722, 4724, 4738 |
 | Object Access | File System, File Share | 4663 |
 
-Also enabled **"Audit: Force audit policy subcategory settings to override audit policy category settings"**, without this, legacy audit policy can silently override the modern Advanced Audit Policy settings above.
+I also turned on "Audit: Force audit policy subcategory settings to override audit policy category settings". Without it, the legacy audit policy can quietly override everything above. That exact problem came back to bite me in Phase 1.
 
-### 4. File Share SACL + Canary Token
-Applied a SACL directly on a file server's **local folder path** (not the mapped drive, Windows blocks remote/mapped-drive auditing changes) auditing Create, Append, and Delete. A canary token file was placed inside the same share as an independent tripwire, so any interaction with it is a signal on its own, regardless of the SIEM.
+### A SACL and a canary token on a file share
 
-### 5. Log Shipping: Winlogbeat → Elasticsearch
-Installed on both hosts, shipping Application, System, Security, Sysmon, and PowerShell Operational logs directly to Elasticsearch:
+I added a SACL to a file share that audits Create, Append and Delete. My first attempt was through the mapped drive, and Windows complained about a "remote setting" and stripped the inherited entries. Setting it on the server's local folder path worked.
+
+I also dropped a canary token file into the same share. It alerts on its own if anyone opens it, so it still works even if my SIEM pipeline is down.
+
+### Winlogbeat
+
+Winlogbeat on both hosts ships the Application, System, Security, Sysmon and PowerShell Operational logs straight to Elasticsearch:
+
 ```yaml
 winlogbeat.event_logs:
   - name: Security
@@ -122,51 +90,35 @@ output.elasticsearch:
   username: "elastic"
   password: "<redacted>"
 ```
-> Elastic Stack 8.x enables TLS on Elasticsearch by default with a self-signed certificate, `ssl.verification_mode: none` is an accepted trade-off for an isolated lab, not production.
 
-### 6. Validation
-Created a `winlogbeat-*` data view in Kibana and confirmed live events from both hosts, then ran the exit-criteria search:
+Elastic 8.x turns on TLS by default with a self-signed certificate. Skipping verification is fine for an isolated lab, but not something I'd do in production.
+
+### Checking it worked
+
+I created a `winlogbeat-*` data view in Kibana, watched events arrive from both hosts, and ran the search I'd set as the goal for this phase:
+
 ```
 event.code:4624
 ```
-A normal user logon returned, fully attributable to a user, host, and timestamp.
 
-## What Security Concepts?
+It returned a normal user logon with the user, the host and the time. That was the finish line.
 
-- **Defense-in-depth logging**: no single log source tells the whole story; Sysmon, PowerShell logging, and Windows Security auditing each cover different attacker behavior
-- **Audit policy precedence**: legacy vs. Advanced Audit Policy conflicts, and why forcing subcategory settings matters
-- **The principle of "baseline before threat hunting"**: you must be able to recognize *normal* activity before you can recognize anomalous activity
-- **Deception technology fundamentals**: a canary token as a low-cost, high-signal tripwire independent of log pipeline health
-- **SACL vs. DACL**: auditing access is a separate control from granting access
-- **TLS trust models**: self-signed certificates, and the operational trade-off of skipping verification in an isolated lab context
+## What went wrong along the way
 
-## What Did I Learn?
+- **"Access is denied" in Event Viewer.** Every time, it was UAC: I wasn't running elevated. It was never a real permissions problem.
+- **The mapped-drive SACL.** As above, auditing has to be set on the local path.
+- **A YAML comment in the wrong place.** I'd left `output.elasticsearch:` commented out while its child settings were active. Winlogbeat failed with "did not find the expected key", which looked unrelated. A `#` only comments out a line when it's the first character; at the end of a line it does nothing.
+- **TLS by default.** Elastic 8.x expects `https://`, so the output needs either a trusted certificate or an explicit verification bypass.
 
-- Windows Event Viewer's "Access is denied" errors are almost always a UAC token/elevation issue, not a genuine permissions gap
-- SACLs applied via a mapped network drive trigger a "remote setting" warning and strip inherited entries, set them on the real local folder path instead
-- YAML is whitespace- and comment-position-sensitive: a `#` at the *end* of a line does nothing; it must be the first character to comment out a line
-- A single misplaced comment character (`output.elasticsearch:` left commented while its child keys were active) produces a confusing "did not find the expected key" error that looks unrelated to the real cause
-- Elastic Stack 8.x enables security and TLS by default, plan for `https://` and either proper CA-signed certs or an explicit verification bypass in a lab
+## What I'd still change
 
-## What Would I Improve?
+- Send Winlogbeat through Logstash instead of straight to Elasticsearch, so I can enrich fields and name the index `winlogbeat-lab-*` to match my `filebeat-lab-*` index.
+- Replace the self-signed certificate with a proper internal CA.
+- Find out why Sysmon Event IDs 3 (network connection) and 22 (DNS query) don't fire reliably on the Windows 10 client. I noticed it here, and it turned into a real blind spot for LLMNR poisoning in Phase 1.
+- Add index lifecycle management so `winlogbeat-*` doesn't grow forever.
+- Build a baseline dashboard (logon volume, top event codes) instead of relying on ad hoc searches.
 
-- Route Winlogbeat through Logstash (as originally planned) rather than direct-to-Elasticsearch, to enable field enrichment and consistent index naming (`winlogbeat-lab-*`) matching the existing `filebeat-lab-*` convention
-- Replace the self-signed certificate + `ssl.verification_mode: none` with a proper internal CA, even in a lab, as a hardening exercise
-- Investigate why Sysmon Event ID 3 (Network Connection) and 22 (DNS Query) did not consistently fire on the Windows 10 endpoint despite the SwiftOnSecurity config being loaded, a real gap worth root-causing before relying on network-layer Sysmon telemetry in later phases
-- Set up Index Lifecycle Management (ILM) so `winlogbeat-*` doesn't grow unbounded
-- Build a baseline Kibana dashboard (logon volume, top event codes) rather than relying solely on ad hoc searches
-
-## What Evidence Do I Have?
-
-- Sysmon confirmed running and generating events (Process Create, DNS Query) on both hosts
-- PowerShell Event IDs 4103/4104 captured with real script block content
-- Event ID 4663 captured on the audited file share following a real create/delete test
-- Live `winlogbeat-*` index in Kibana with hundreds of documents from both hosts within minutes of deployment
-- A successful, attributable **Event ID 4624** search in Kibana, the phase's exit criteria, showing a specific user, host, and timestamp
-
----
-
-## Screenshots
+## Evidence
 
 **Sysmon running with the SwiftOnSecurity config**
 
@@ -177,45 +129,28 @@ A normal user logon returned, fully attributable to a user, host, and timestamp.
 ![PowerShell 4103](Screenshots/02-powershell-logging/02-powershell-logging-event-4103.png)
 ![PowerShell 4104](Screenshots/02-powershell-logging/02-powershell-logging-event-4104.png)
 
-**Advanced Audit Policy configured through Group Policy**
+**Advanced Audit Policy in Group Policy**
 
 ![Audit policy 1](Screenshots/03-audit-policy-gpo/03-audit-policy-gpo-01.png)
 ![Audit policy 2](Screenshots/03-audit-policy-gpo/03-audit-policy-gpo-02.png)
 ![Audit policy 3](Screenshots/03-audit-policy-gpo/03-audit-policy-gpo-03.png)
 
-**Event ID 4663 on the audited file share**
+**Event ID 4663 after a create and delete on the audited share**
 
 ![Event 4663](Screenshots/04-event-4663/04-event-4663.png)
 
-**Live winlogbeat-* data in Kibana Discover**
+**Live winlogbeat-* data in Kibana**
 
 ![Kibana winlogbeat data 1](Screenshots/05-kibana-winlogbeat-date/05-kibana-winlogbeat-date-01.png)
 ![Kibana winlogbeat data 2](Screenshots/05-kibana-winlogbeat-date/05-kibana-winlogbeat-date-02.png)
 ![Kibana winlogbeat data 3](Screenshots/05-kibana-winlogbeat-date/05-kibana-winlogbeat-date-03.png)
 
-**Event ID 4624: the exit criteria, a normal logon searchable in Kibana**
+**Event ID 4624: a normal logon, searchable in Kibana**
 
 ![Event 4624 validation](Screenshots/06-event-4624-validation/06-event-4624-validation.png)
 
 ---
 
-## Roadmap
+Next: [Phase 1: Credential Access](../Phase-1-Credential-Access) · Back to the [lab overview](../README.md)
 
-- [x] Deploy Sysmon on DC + Windows 10 endpoint
-- [x] Enable PowerShell Script Block & Module Logging via GPO
-- [x] Configure Advanced Audit Policy across 4 categories
-- [x] Apply a SACL and canary token on a file share
-- [x] Ship logs via Winlogbeat into Elasticsearch
-- [x] Validate a normal logon (4624) is searchable in Kibana
-- [x] [Phase 1](../Phase-1-Credential-Access): Recon and credential access (LLMNR poisoning, password spraying, Kerberoasting, AS-REP Roasting)
-- [x] [Phase 2](../Phase-2-Attack-Path-Mapping): Attack path mapping with BloodHound
-- [x] [Phase 3](../Phase-3-Lateral-Movement): Lateral movement and escalation
-- [x] [Phase 4](../Phase-4-DCSync-Golden-Ticket): Persistence (DCSync and Golden Ticket)
-- [x] [Phase 5](../Phase-5-Detection-Engineering): Detection engineering
-- [x] [Phase 6](../Phase-6-Incident-Report): Incident report
-
----
-
-## Security Disclaimer
-
-This is a personal, isolated home lab built strictly for educational and skills-development purposes. All hostnames, IP addresses, and credentials referenced in this documentation are placeholders or have been redacted. No techniques described here were performed against any system without explicit authorization.
+*This is an isolated home lab. Hostnames, IP addresses and credentials shown are lab values or redacted.*

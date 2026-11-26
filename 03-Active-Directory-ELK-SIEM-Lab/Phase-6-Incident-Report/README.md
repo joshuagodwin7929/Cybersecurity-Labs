@@ -1,90 +1,47 @@
 # Incident Report: Simulated Domain Compromise
-## LLMNR Poisoning → DCSync → Golden Ticket
 
-<div align="center">
-
-![Status](https://img.shields.io/badge/Status-Simulation%20Complete-success?style=for-the-badge)
-![Severity](https://img.shields.io/badge/Severity-Critical-red?style=for-the-badge)
-![Domain](https://img.shields.io/badge/Domain-JOSHUA.LOCAL-0078D4?style=for-the-badge&logo=microsoft)
-![Phases](https://img.shields.io/badge/Phases%20Covered-1%20through%204-purple?style=for-the-badge)
-
-</div>
-
----
+**LLMNR Poisoning to DCSync to Golden Ticket**
 
 | Field | Detail |
-|-------|---------|
-| **Prepared for** | Engineering Manager Briefing |
-| **Classification** | Internal: Lab Simulation (JOSHUA.LOCAL) |
-| **Prepared by** | Okunnuwa Joshua Godwin |
-| **Lab Activity** | Phases 1–4, Personal AD Attack/Defense Lab |
-| **Report Type** | Post-Exercise Findings & Recommendations |
+|-------|--------|
+| Prepared by | Okunnuwa Joshua Godwin |
+| Scope | Phases 1 to 4, personal AD attack/defense lab (JOSHUA.LOCAL) |
+| Type | Post-exercise findings and recommendations |
 
----
+I wrote this report the way I'd brief an engineering manager after the exercise: what I did, what my own logging caught, and the one place it didn't.
 
-## Executive Summary
+## Summary
 
-> Over a controlled, self-hosted lab exercise, I simulated a full domain compromise chain starting from a single **unauthenticated network position** and ending in **complete, undetected control of the domain controller.**
+In a controlled, self-hosted lab, I ran a full domain compromise chain starting from an unauthenticated position on the network and ending in complete control of the domain controller. The chain worked end to end.
 
-The chain succeeded end-to-end. Of the six major techniques used:
+Of the six techniques I used, four left a clear host-based trace and two left almost nothing. The finding I'd put in front of leadership: my logging as configured would have stopped this attacker at the reconnaissance and credential-theft stages, but would not have detected the actual loss of domain control.
 
-| Coverage | Count | What It Means |
-|----------|-------|---------------|
-| ✅ Fully detectable | 4 techniques | Strong templates for production detection rules |
-| ❌ Left no host-based trace | 2 techniques | DCSync and Golden Ticket: headline finding |
+| Step | Technique | MITRE ID | Detected? | Note |
+|------|-----------|----------|-----------|------|
+| 1 | LLMNR/NBT-NS Poisoning | T1557.001 | Partial | Capture is guaranteed by the protocol; the consequence depends on password strength |
+| 2 | Kerberoasting | T1558.003 | Yes | AES-only policy is a working mitigating control |
+| 3 | BloodHound enumeration | T1087.002 | Partial | Mapped the exact 3-hop path to Domain Admin without touching credentials |
+| 4 | Lateral movement and SYSTEM | T1021.002 / T1053.005 | Yes | 61 ms between logon and execution, detectable by a SIEM rule |
+| 5 | LSASS dump and DCSync | T1003.001 / T1003.006 | No | Zero log entries; DS Access auditing never enabled |
+| 6 | Golden Ticket | T1558.001 | One artifact | A single normal-looking logon, indistinguishable from a legitimate admin |
 
-**The headline finding:** My current logging posture would have stopped this attacker at the reconnaissance and credential-theft stages, but would not have detected the actual loss of domain control.
+## What happened, step by step
 
----
+### 1. Initial access: LLMNR/NBT-NS poisoning
 
-## ⏱ Attack Timeline
+With no credentials and just a position on the internal network, I ran a poisoning tool that answered broadcast name-resolution fallbacks from domain-joined hosts. It captured NTLMv2 hashes for three real accounts, including `Administrator`, from ordinary background network noise. No phishing, no exploit, just listening. One hash cracked quickly because the password was weak; the others held. Capture is guaranteed by the protocol, but whether it matters depends on password strength.
 
-| Step | Technique | MITRE ID | Detected? | Key Finding |
-|------|-----------|----------|-----------|-------------|
-| 1 | LLMNR/NBT-NS Poisoning | T1557.001 | ⚠ Partial | Capture guaranteed by protocol: only consequence depends on password strength |
-| 2 | Kerberoasting | T1558.003 | ✅ Yes | AES-only policy is a working mitigating control |
-| 3 | BloodHound Enumeration | T1087.002 | ⚠ Partial | Mapped exact 3-hop path to Domain Admin without touching credentials |
-| 4 | Lateral Movement & SYSTEM | T1021.002 / T1053.005 | ✅ Yes | 61ms gap between logon and execution: detectable by SIEM rule |
-| 5 | LSASS Dump + DCSync | T1003.001 / T1003.006 | ❌ None | Zero log entries: DS Access auditing never enabled |
-| 6 | Golden Ticket | T1558.001 | ⚠ One artifact | Single normal-looking network logon: indistinguishable from legitimate admin |
+### 2. Credential access: Kerberoasting
 
----
+From a valid but low-privileged session, I requested a Kerberos service ticket for an SPN-registered account and cracked it offline. No malware, no exploit, just a normal Kerberos feature abused. Worth calling out: the domain's AES-only policy meant I had to deliberately weaken an account's encryption settings to produce a crackable hash. That policy is a real control, and it was already working.
 
-## Detailed Narrative
+### 3. Reconnaissance: BloodHound attack-path mapping
 
-### 1: Initial Access: LLMNR/NBT-NS Poisoning
+With one low-privilege account I mapped the domain's trust and permission graph and found a directional path from a standard user to Domain Admins. This is the step I'd most want leadership to understand. An attacker doesn't need luck at every step if they can find the one path that works. It touches no credentials at all, but it turned "I have one weak account" into "I know exactly which three hops reach full domain control."
 
-Positioned on the internal network with no credentials, I ran a poisoning tool that answered broadcast name-resolution fallbacks from domain-joined hosts. This captured NTLMv2 hashes for three real accounts, including `Administrator`, from ordinary background network noise.
+### 4. Lateral movement and privilege escalation
 
-> **No phishing. No exploit. Just listening.**
-
-One hash cracked quickly due to a weak password. The others resisted cracking, which illustrates that **capture is guaranteed by the protocol; only the consequence depends on password strength.**
-
----
-
-### 2: Credential Access: Kerberoasting
-
-Using a valid but low-privileged domain session, I requested a Kerberos service ticket for an SPN-registered account and cracked it offline. This is a living-off-the-land technique, no malware, no exploit, just a normal Kerberos feature abused.
-
-> **Worth calling out:** This domain's AES-only policy required me to deliberately weaken an account's encryption settings to produce a crackable hash. **That policy is a genuine mitigating control and it is already working correctly.**
-
----
-
-### 3: Reconnaissance: BloodHound Attack Path Mapping
-
-With one set of low-privilege credentials, I mapped the entire domain's trust and permission graph and found a directional path from a standard user account to Domain Admins.
-
-> ⚠ **This is the step most important for leadership to understand.**
->
-> An attacker doesn't need to be lucky at every step if they can map the one path that works. This step doesn't touch credentials at all, it's pure information gathering, but it transformed *"I have one weak account"* into *"I know exactly which three hops get me to full domain control."*
-
----
-
-### 4: Lateral Movement & Privilege Escalation
-
-The mapped path required local admin rights on a workstation. A realistic GPO misconfiguration granted that access. Code was then executed as `NT AUTHORITY\SYSTEM` via a Task Scheduler-based technique (atexec).
-
-This step produced the **cleanest detection signal in the entire chain:**
+The mapped path needed local admin on a workstation, which a realistic GPO misconfiguration provided. I then executed code as `NT AUTHORITY\SYSTEM` through a Task Scheduler technique (atexec). This produced the cleanest detection signal in the whole chain:
 
 ```
 4624 (Network logon, ElevatedToken)
@@ -92,115 +49,55 @@ This step produced the **cleanest detection signal in the entire chain:**
       └── Sysmon EID 1 (cmd.exe → whoami.exe, output to C:\Windows\Temp\[random])
 ```
 
-> **That 61ms timing gap between logon and command execution is a detail a human analyst would never think to check, but a SIEM rule easily can.**
+That 61 ms gap between logon and command execution is something a human analyst would never think to check, but a SIEM rule can.
+
+### 5. Credential theft: LSASS dump and DCSync
+
+From the SYSTEM foothold I extracted a cached Administrator credential from lsass memory, after disabling endpoint protection, which in production would itself be a loud signal. I used that credential to impersonate DC replication rights and pull `krbtgt` keys directly from the live DC.
+
+This step generated zero log entries. Directory Service Access auditing, the one setting that would have caught it, was never enabled. That isn't a tooling failure; it's a configuration gap that almost certainly exists by default in many real environments.
+
+### 6. Persistence: Golden Ticket
+
+With the `krbtgt` keys I forged a ticket granting Domain Admin access indefinitely, with no real password and no further contact with the DC. Two patched controls correctly rejected my first two attempts:
+
+| Attempt | Why it failed | Control |
+|---------|---------------|---------|
+| Fake account (non-existent) | CVE-2021-42287 PAC validation | Working |
+| RC4-encrypted ticket | AES-only Kerberos enforcement | Working |
+| AES256 + real account | n/a | Succeeded |
+
+The only artifact this leaves is a single ordinary-looking network logon, with no way to tell it apart from a legitimate admin logging on remotely.
+
+## Business impact
+
+Had this been real, the foothold from Step 4 alone would have been enough to escalate to full domain control at any later time, without repeating any earlier step. The forged ticket doesn't expire on its own and doesn't need the originally compromised account to stay active. Detecting steps 1 to 4 would interrupt the chain before domain-level impact; as configured, steps 5 and 6 would not have been interrupted.
+
+## Recommendations, in priority order
+
+1. **Enable Directory Service Access (4662) auditing** with SACLs scoped to the two DCSync-relevant replication rights. This is the highest-leverage fix: it turns an invisible step into an alertable event, and it's essentially one configuration change. (I implemented this in [Phase 5B Gap 1](../Phase-5-Detection-Engineering/5B-Closing-The-Detection-Gaps/Gap-1-DCSync-No-Audit-Trail/README.md).)
+2. **Deploy a network or identity-layer sensor** (Microsoft Defender for Identity or Zeek) as a compensating control for both the LLMNR and DCSync gaps. Both are protocol-level abuses that host-based Sysmon logging is structurally not positioned to catch.
+3. **Add a "4769 without a preceding 4768" correlation rule** as a general tripwire for credential-replay and forged-ticket activity. It would have flagged the one surviving artifact from steps 5 and 6. (Implemented in [Phase 5B Gap 2](../Phase-5-Detection-Engineering/5B-Closing-The-Detection-Gaps/Gap-2-Golden-Ticket-No-Tripwire/README.md).)
+4. **Rotate `krbtgt` on a schedule**, twice, spaced by the maximum ticket lifetime, as standing hygiene regardless of whether a compromise is suspected.
+5. **Treat EDR-disabling as a first-class alert.** The credential-theft step only worked after I disabled real-time protection. In production that action, from the agent's own tamper-protection logging, should be one of the loudest signals available.
+
+## Closing finding
+
+The strongest finding here isn't any single technique. It's that my detection coverage has a hard boundary exactly where the DC's own replication protocol is abused, and that boundary is closable with one audit-policy change plus a network sensor, not a rebuild.
+
+## Related phases
+
+| Phase | Focus |
+|-------|-------|
+| [Phase 0](../Phase-0-Visibility-Foundation) | ELK Stack, Sysmon, Winlogbeat |
+| [Phase 1](../Phase-1-Credential-Access) | LLMNR, Kerberoasting, AS-REP Roasting |
+| [Phase 2](../Phase-2-Attack-Path-Mapping) | BloodHound enumeration |
+| [Phase 3](../Phase-3-Lateral-Movement) | Lateral movement, GPO abuse |
+| [Phase 4](../Phase-4-DCSync-Golden-Ticket) | DCSync, Golden Ticket |
+| [Phase 5](../Phase-5-Detection-Engineering) | Detection engineering, KQL, dashboard |
 
 ---
 
-### 5: Credential Theft: LSASS Dump & DCSync
+Back to the [lab overview](../README.md)
 
-From the SYSTEM foothold, I extracted a cached Administrator credential from lsass memory, after disabling endpoint protection, a step that would itself be a loud detection signal in production.
-
-That credential was then used to impersonate Domain Controller replication rights and pull `krbtgt` keys directly from the live DC.
-
-> ❌ **This step generated zero log entries.**
->
-> Directory Service Access auditing, the one configuration that would have caught it, was never enabled. This is not a tooling failure. It is a configuration gap that almost certainly exists in many real environments by default.
-
----
-
-### 6: Persistence: Golden Ticket
-
-With the `krbtgt` keys extracted, I forged a ticket granting Domain Admin access indefinitely, without knowing any real password and without needing to contact the DC again.
-
-**Two patched security controls correctly rejected my first two attempts:**
-
-| Attempt | Reason for Failure | Control Working |
-|---------|-------------------|-----------------|
-| Fake account (non-existent) | CVE-2021-42287 PAC validation | ✅ Yes |
-| RC4-encrypted ticket | AES-only Kerberos enforcement | ✅ Yes |
-| AES256 + real account | n/a | ❌ Succeeded |
-
-> **The only artifact this leaves behind is a single, ordinary-looking network logon event, with no way to distinguish it from a legitimate administrator logging on remotely.**
-
----
-
-## Business Impact
-
-> Had this been a real environment:
-
-The foothold achieved in **Step 4** alone would have been sufficient for an attacker to escalate to full domain control at any future time, without repeating any earlier steps. The forged ticket does not expire on its own and does not require the original compromised account to remain active.
-
-```
-Detecting steps 1–4      →  Chain interrupted before domain-level impact
-As currently configured  →  Steps 5–6 would not have been interrupted
-```
-
----
-
-## ✅ Recommendations: Priority Order
-
-### Priority 1: Immediate (Single Configuration Change)
-
-**Enable Directory Service Access (4662) auditing** with SACLs scoped to the two DCSync-relevant replication rights.
-
-This is the highest-leverage fix available. It converts an invisible step into a loud, alertable event, and it is a one-checkbox configuration change.
-
----
-
-### Priority 2: Short Term (Compensating Controls)
-
-**Deploy a network or identity-layer sensor**: Microsoft Defender for Identity or Zeek, as a compensating control for both the LLMNR poisoning and DCSync detection gaps.
-
-Both are protocol-level abuses that host-based Sysmon logging is structurally not well-positioned to catch.
-
----
-
-### Priority 3: Detection Rule Addition
-
-**Add a "4769 without a preceding 4768" correlation rule** as a general-purpose tripwire for credential-replay and forged-ticket activity. This would have flagged the one surviving artifact from both Steps 5 and 6.
-
----
-
-### Priority 4: Standing Hygiene Practice
-
-**Rotate `krbtgt` on a schedule**: twice, spaced by the maximum ticket lifetime, as a standing hygiene practice, independent of whether a compromise is suspected.
-
----
-
-### Priority 5: Follow-Up Detection Note
-
-**Treat EDR-disabling as a first-class alert.** The credential-theft step only worked after disabling real-time protection. In production, that action, from the endpoint agent's own tamper-protection logging, should be one of the loudest signals available.
-
----
-
-## Closing Finding
-
-> **The strongest finding from this exercise isn't any single technique.**
->
-> It's that our detection coverage has a hard boundary exactly where the DC's own replication protocol is abused, and that boundary is **closable with one audit-policy change plus a network sensor**, not a wholesale re-architecture.
-
----
-
-## Related Lab Phases
-
-| Phase | Focus | Link |
-|-------|-------|------|
-| Phase 0 | ELK Stack, Sysmon, Winlogbeat | [View →](../Phase-0-Visibility-Foundation) |
-| Phase 1 | LLMNR, Kerberoasting, AS-REP Roasting | [View →](../Phase-1-Credential-Access) |
-| Phase 2 | BloodHound Enumeration | [View →](../Phase-2-Attack-Path-Mapping) |
-| Phase 3 | Lateral Movement, GPO Abuse | [View →](../Phase-3-Lateral-Movement) |
-| Phase 4 | DCSync, Golden Ticket | [View →](../Phase-4-DCSync-Golden-Ticket) |
-| Phase 5 | Detection Engineering, KQL, Dashboard | [View →](../Phase-5-Detection-Engineering) |
-
----
-
-<div align="center">
-
-**Okunnuwa Joshua Godwin** | Security Operations | Detection Engineering | Active Directory
-
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-0077B5?style=flat-square&logo=linkedin)](https://www.linkedin.com/in/okunnuwa-joshua-godwin/)
-[![GitHub](https://img.shields.io/badge/GitHub-Portfolio-181717?style=flat-square&logo=github)](https://github.com/joshuagodwin7929)
-
-*This report documents a controlled simulation conducted entirely within a private isolated lab environment. No real systems were targeted.*
-
-</div>
+*This report documents a controlled simulation run entirely in a private, isolated lab. No real systems were targeted.*
