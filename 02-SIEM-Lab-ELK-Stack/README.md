@@ -286,17 +286,7 @@ Confirms the `filebeat-lab-*` index exists with a non-zero document count.
 
 ## 📸 Screenshots
 
-> Add screenshots to a `/screenshots` folder in this repo and reference them below.
-
-| Description | Screenshot |
-|---|---|
-| Docker containers running | `![docker ps](screenshots/docker-ps.png)` |
-| Security enforcement (401 response) | `![401 response](screenshots/security-401.png)` |
-| Generated certificates | `![certs folder](screenshots/certs-folder.png)` |
-| Kibana over HTTPS | `![kibana https](screenshots/kibana-https.png)` |
-| Successful login | `![kibana login](screenshots/kibana-login.png)` |
-| Data view creation | `![data view](screenshots/data-view.png)` |
-| Discover with real log data | `![discover hits](screenshots/discover-hits.png)` |
+Screenshots are inline in each section above.
 
 ---
 

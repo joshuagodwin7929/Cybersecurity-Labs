@@ -1,97 +1,54 @@
-# 🛡️ Cybersecurity Homelabs
+# AD-Attack-Defense-Lab
 
-> Hands-on cybersecurity labs focused on Active Directory, SIEM, detection engineering, network security, and incident response.
+By OKUNNUWA JOSHUA GODWIN | [LinkedIn](https://www.linkedin.com/in/okunnuwa-joshua-godwin)
 
-I used these homelabs to build practical experience with enterprise security technologies and document what I learn along the way.
+Three connected home labs. I built an Active Directory domain, built an Elastic SIEM to watch it, then attacked the domain one technique at a time and checked what the SIEM could and couldn't see.
 
----
+My rule for all of it: **log first, attack second, hunt third, then formalize.**
 
-## 🚀 Featured Projects
+## Start here
 
-| Project | Focus | Technologies |
-|---|---|---|
-| [01-Active Directory Homelab](./01-Active-Directory-Homelab/) | Enterprise identity & Windows administration | AD DS • DNS • DHCP • GPO • AD CS |
-| [02-SIEM Lab – ELK Stack](./02-SIEM-Lab-ELK-Stack/) | Security monitoring & log analysis | Elasticsearch • Logstash • Kibana |
+**[03: Active Directory + ELK SIEM Lab](03-Active-Directory-ELK-SIEM-Lab/)** is the main project. It runs a full attack chain against my domain, from LLMNR poisoning and password spraying through Kerberoasting, BloodHound path mapping and lateral movement to DCSync and a Golden Ticket. For each step I hunted for the attack in Kibana and wrote down where visibility broke. Then I closed the two biggest gaps and wrote the whole thing up as an incident report.
 
----
-
-## 🔐 Security Domains
-
-### Identity & Access
-- Active Directory
-- Windows Server
-- Group Policy
-- Certificate Services
-- User & OU Management
-
-### Security Monitoring
-- SIEM
-- Log Collection
-- Detection Engineering
-- Security Analytics
-- Threat Hunting
-
-### Network Security
-- Network Traffic Analysis
-- Wireshark
-- IDS/IPS
-- Network Segmentation
-- Packet Analysis
-
-### Incident Response
-- Alert Investigation
-- IOC Analysis
-- Incident Documentation
-- Containment
-- Root Cause Analysis
-
----
-
-## 📚 Lab Philosophy
-
-Every project is documented around:
-
-1. **What was built**
-2. **Why it was built**
-3. **How it was configured**
-4. **What security concepts were demonstrated**
-5. **What was learned**
-6. **How the technology could be used in a real organization**
-
----
-
-## 📊 Projects
-
-| Project | Status |
+| Phase | What happens |
 |---|---|
-| Active Directory Homelab | 🟢 Completed |
-| SIEM Lab – ELK Stack | 🟢 Completed |
-| Detection Engineering Lab | 🟢 Completed in another repository |
-| Network Security Lab | 🔵 Planned in another repository|
-| Incident Response Lab | 🔵 Planned in another repository |
+| [0: Visibility Foundation](03-Active-Directory-ELK-SIEM-Lab/Phase-0-Visibility-Foundation/) | Sysmon, PowerShell logging, Advanced Audit Policy, Winlogbeat into Elastic |
+| [1: Credential Access](03-Active-Directory-ELK-SIEM-Lab/Phase-1-Credential-Access/) | LLMNR poisoning, password spraying, Kerberoasting, AS-REP Roasting |
+| [2: Attack Path Mapping](03-Active-Directory-ELK-SIEM-Lab/Phase-2-Attack-Path-Mapping/) | SharpHound and BloodHound CE |
+| [3: Lateral Movement](03-Active-Directory-ELK-SIEM-Lab/Phase-3-Lateral-Movement/) | A GPO misconfiguration, SMB, atexec as SYSTEM |
+| [4: DCSync and Golden Ticket](03-Active-Directory-ELK-SIEM-Lab/Phase-4-DCSync-Golden-Ticket/) | Domain persistence, and the two attacks my SIEM couldn't see |
+| [5: Detection Engineering](03-Active-Directory-ELK-SIEM-Lab/Phase-5-Detection-Engineering/) | Hunt queries for every technique, then closing the DCSync and Golden Ticket gaps |
+| [6: Incident Report](03-Active-Directory-ELK-SIEM-Lab/Phase-6-Incident-Report/) | The full chain written up as an incident, with recommendations |
 
----
+## The other two labs
 
-## 🎯 Current Focus
+| Lab | What I built |
+|---|---|
+| [01: Active Directory Homelab](01-Active-Directory-Homelab/) | The domain everything runs on: Windows Server 2022 DC, DNS, DHCP, OUs and groups, Group Policy, AD Certificate Services, file shares, and a domain-joined Windows 10 client |
+| [02: SIEM Lab, ELK Stack](02-SIEM-Lab-ELK-Stack/) | The Elastic Stack in Docker Compose with TLS throughout, then (in [Part 4](02-SIEM-Lab-ELK-Stack/Part-4-Continuation/)) least-privilege users, index lifecycle management, dashboards and snapshot backups |
 
-- Active Directory security
-- SIEM engineering
-- Detection engineering
-- Windows security
-- Network traffic analysis
-- Incident response
+## Where this work continued
 
----
+The hunt queries from Phase 5 didn't stop here:
 
-## 📁 Repository Structure
+- **[Detection-Engineering](https://github.com/joshuagodwin7929/Detection-Engineering):** they became Sigma rules, compiled to Elastic with a CI check on every push.
+- **[Purple-Team-Automation](https://github.com/joshuagodwin7929/Purple-Team-Automation):** I ran the attacks again through MITRE Caldera and validated each rule with a live Kibana alert. That re-test also caught a bug in my Phase 5B DCSync rule, which is now corrected [here](03-Active-Directory-ELK-SIEM-Lab/Phase-5-Detection-Engineering/5B-Closing-The-Detection-Gaps/Gap-1-DCSync-No-Audit-Trail/README.md#correction-november-2026).
+
+## How each write-up is organised
+
+Most phases answer the same questions: what I built, why, which technologies, how, which security concepts it shows, what I learned, what I'd improve, and what evidence I have.
+
+## Repo layout
 
 ```text
-Homelabs/
-│
+AD-Attack-Defense-Lab/
 ├── 01-Active-Directory-Homelab/
-│
 ├── 02-SIEM-Lab-ELK-Stack/
-|
 ├── 03-Active-Directory-ELK-SIEM-Lab/
-│
+├── LICENSE
 └── README.md
+```
+
+## Disclaimer
+
+Everything here ran in an isolated lab I own. No production systems, third-party networks or real user data were involved. Passwords, hashes and IP addresses shown are lab-only values.

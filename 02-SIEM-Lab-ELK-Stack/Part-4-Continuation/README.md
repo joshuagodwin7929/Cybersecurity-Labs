@@ -1,9 +1,6 @@
-
-
-Readme phase2 · MD
 # SIEM-Lab-ELK-Stack — Part 4: Access Control, Lifecycle Management, Dashboards & Backups
  
-**A continuation of the [ELK Stack Setup, Elasticsearch and Kibana Deployment](./README.md) project.**
+**A continuation of the [ELK Stack Setup, Elasticsearch and Kibana Deployment](../README.md) project.**
  
 The part 1, 2, 3 covered building and hardening the stack itself: Docker Compose deployment, end-to-end TLS, and a live log ingestion pipeline from a real Linux host. This phase picks up exactly where that left off — moving from "the stack works" to "the stack is operated the way a real SIEM environment would be."
  
@@ -11,7 +8,7 @@ The part 1, 2, 3 covered building and hardening the stack itself: Docker Compose
  
 ## 📋 Table of Contents
  
-- [What This Phase Covers](#-what-this-phase-covers)
+- [What This Part Covers](#-what-this-part-covers)
 - [1. Named, Least-Privilege Users & Roles](#1-named-least-privilege-users--roles)
 - [2. Index Lifecycle Management (ILM)](#2-index-lifecycle-management-ilm)
 - [3. Dashboards](#3-dashboards)

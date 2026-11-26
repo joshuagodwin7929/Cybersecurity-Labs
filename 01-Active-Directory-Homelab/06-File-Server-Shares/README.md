@@ -16,7 +16,7 @@ access its own data.
 - **Management**
 - **Accounting**
 - Configured NTFS permissions scoped to each department's security group 
-  (created from the OU structure in [02-users-and-ous](../02-users-and-ous))
+  (created from the OU structure in [02-users-and-ous](../02-Users-And-OUs))
 - Configured share-level permissions to complement NTFS permissions 
   (principle of least privilege — only the relevant department group 
   gets Modify/Read access)
@@ -24,9 +24,6 @@ access its own data.
   (e.g. HR user cannot browse the Finance share)
 
 ## Screenshots
-![Share setup](../images/file-shares.png)
-![NTFS permissions](../images/ntfs-permissions.png)
-![Access test](../images/access-test.png)
 - <img width="584" height="406" alt="Share file department" src="https://github.com/user-attachments/assets/7781028d-3195-47f0-bf4c-ac06fa2f758b" />
 - <img width="572" height="395" alt="File Share Permission" src="https://github.com/user-attachments/assets/e37fa425-f153-4c6b-a090-374ae222a630" />
 - <img width="508" height="356" alt="Access Test" src="https://github.com/user-attachments/assets/1159cbe0-1ac9-4556-8d76-20521ec31098" />

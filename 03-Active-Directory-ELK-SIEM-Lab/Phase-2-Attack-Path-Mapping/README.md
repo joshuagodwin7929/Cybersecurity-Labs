@@ -2,9 +2,9 @@
 #  Phase 2 - Active Directory Attack Path Mapping
 
 **Home Lab Series:** Detection Engineering & Offensive Security in a Self-Hosted AD Environment
-**Phase 2 of 4** — *Mapping the Terrain*
+**Phase 2 of 6** — *Mapping the Terrain*
 **Preceded by:** Phase 0 (Visibility Foundation), Phase 1 (Credential Access)
-**Followed by:** Phase 3 (Lateral Movement), Phase 4 (Persistence)
+**Followed by:** Phase 3 (Lateral Movement), Phase 4 (Persistence), Phase 5 (Detection Engineering), Phase 6 (Incident Report)
 
 > ⚠️ **Educational Use Disclaimer:** This lab was built and executed entirely within an isolated, self-hosted virtual environment for personal learning and skills development. All tools, techniques, and targets belong to infrastructure I own and control. No production systems, third-party networks, or real user data were involved at any stage.
 
@@ -19,20 +19,6 @@ This repository documents a progressive, multi-phase home lab covering both **de
 - **Phase 2** (this phase) shifts to reconnaissance: mapping the domain's actual privilege relationships to identify real, exploitable paths to Domain Admin — the step a real attacker takes immediately after establishing a foothold.
 - **Phase 3** built on this map to execute lateral movement and privilege escalation via a discovered GPO misconfiguration.
 - **Phase 4** used the resulting access to perform DCSync and forge a Golden Ticket, achieving full domain persistence.
-
----
-
-## 🖼️ Screenshots
-
-> *Add captured screenshots to a `/screenshots` folder in this repo and reference them below.*
-
-| # | Description | Screenshot |
-|---|---|---|
-| 1 | SharpHound collection completed successfully (464 objects) | `screenshots/01-sharphound-complete.png` |
-| 2 | BloodHound CE containers running via Docker Compose (Neo4j + PostgreSQL healthy) | `screenshots/02-docker-compose-up.png` |
-| 3 | BloodHound CE login / Explore dashboard | `screenshots/03-bloodhound-dashboard.png` |
-| 4 | Confirmed directional attack path (Cypher `shortestPath` query result) | `screenshots/04-attack-path-graph.png` |
-| 5 | Edge relationship detail panel (Source/Target confirmation) | `screenshots/05-edge-detail.png` |
 
 ---
 
@@ -135,28 +121,47 @@ Low-Priv User --MemberOf--> Domain Users --MemberOf--> Local Users Group
 
 ## 8. WHAT EVIDENCE DO I HAVE?
 
-- SharpHound console output confirming successful enumeration (`SharpHound Enumeration Completed`, 464 objects collected)
-- BloodHound CE deployment logs confirming healthy container status (Neo4j, PostgreSQL, BloodHound API all healthy/started)
-- Screenshot of a confirmed, directional attack path graph generated via Cypher `shortestPath` query
-- Written plain-English risk explanation and remediation recommendation for the identified path (see `/writeups` folder)
+**SharpHound collection completed (464 objects)**
+
+![SharpHound 1](Screenshots/01-sharphound-complete/01-sharphound-installed.png)
+![SharpHound 2](Screenshots/01-sharphound-complete/02-sharphound-installed.png)
+
+**BloodHound CE running in Docker Compose (Neo4j and PostgreSQL healthy)**
+
+![Docker Compose up](Screenshots/02-docker-compose-up/01-docker-compose-up.png)
+
+**BloodHound CE login, data import and dashboard**
+
+![BloodHound login](Screenshots/03-bloodhound-dashboard/01-bloodhound-login-page.png)
+![BloodHound JSON import](Screenshots/03-bloodhound-dashboard/02-bloodhound-json-file.png)
+![BloodHound homepage](Screenshots/03-bloodhound-dashboard/03-bloodhound-homepage.png)
+
+**The confirmed attack path (Cypher `shortestPath` result)**
+
+![Attack pathfinder](Screenshots/04-attack-path-graph/01-bloodhound-attack-pathfinder.png)
+![Pathfinder](Screenshots/04-attack-path-graph/02-bloodhound-pathfinder.png)
+![Attack path](Screenshots/04-attack-path-graph/03-bloodhound-attack-path.png)
+
+**Edge detail confirming source and target**
+
+![Edge detail 1](Screenshots/05-edge-detail/01-bloodhound-edge-details.png)
+![Edge detail 2](Screenshots/05-edge-detail/02-bloodhound-edge-details.png)
 
 ---
 
-## 📂 Repository Structure
+## 📂 Folder Structure
 
 ```
-phase-2-bloodhound-attack-paths/
+Phase-2-Attack-Path-Mapping/
 ├── README.md
-├── screenshots/
-│   ├── 01-sharphound-complete.png
-│   ├── 02-docker-compose-up.png
-│   ├── 03-bloodhound-dashboard.png
-│   ├── 04-attack-path-graph.png
-│   └── 05-edge-detail.png
-└── writeups/
-    └── attack-path-explanation.md
+└── Screenshots/
+    ├── 01-sharphound-complete/
+    ├── 02-docker-compose-up/
+    ├── 03-bloodhound-dashboard/
+    ├── 04-attack-path-graph/
+    └── 05-edge-detail/
 ```
 
 ---
 
-*Part of an ongoing, self-directed home lab series bridging offensive reconnaissance techniques with defensive detection engineering. See the full series index for Phases 0–4.*
+*Part of an ongoing, self-directed home lab series bridging offensive reconnaissance techniques with defensive detection engineering. See the [lab overview](../README.md) for all phases.*

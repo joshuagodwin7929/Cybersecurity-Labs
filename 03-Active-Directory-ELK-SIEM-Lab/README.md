@@ -1,6 +1,6 @@
 # 🛡️ Active Directory ELK SIEM Lab
 
-> A self-hosted Active Directory attack/defense lab built to simulate a real SOC workflow — instrument a domain with an Elastic Stack SIEM, then run a phased adversary emulation against it (credential access → attack path mapping → lateral movement → domain persistence), hunting for each technique in Kibana as it happens.
+> A self-hosted Active Directory attack/defense lab built to simulate a real SOC workflow: instrument a domain with an Elastic Stack SIEM, then run a phased adversary emulation against it (credential access → attack path mapping → lateral movement → domain persistence), hunting for each technique in Kibana as it happens.
 
 ![Active Directory](https://img.shields.io/badge/Active%20Directory-Identity-blue?style=flat-square)
 ![Elastic Stack](https://img.shields.io/badge/Elastic%20Stack-8.12.0-005571?style=flat-square&logo=elasticsearch&logoColor=white)
@@ -22,7 +22,7 @@ Skills developed:
 - Detection engineering and Kibana hunt-query writing
 - Root-cause troubleshooting of real pipeline and configuration gaps
 
-Every phase found at least one real pipeline or configuration gap that had to be diagnosed and fixed — that troubleshooting is as much the point of this lab as the attacks themselves.
+Every phase found at least one real pipeline or configuration gap that had to be diagnosed and fixed. That troubleshooting is as much the point of this lab as the attacks themselves.
 
 ---
 
@@ -36,7 +36,7 @@ Every phase found at least one real pipeline or configuration gap that had to be
 | **Client Endpoint** | Windows 10 (`MY-LAB-PC`) |
 | **Attacker Host** | Kali Linux |
 | **SIEM** | Elastic Stack 8.12.0 (Docker Compose, Ubuntu 22.04.5) |
-| **Network** | VMnet2 (NAT, `192.168.18.0/24`) — AD DHCP as sole authority |
+| **Network** | VMnet2 (NAT, `192.168.18.0/24`), AD DHCP as sole authority |
 
 ---
 
@@ -65,7 +65,7 @@ Every phase found at least one real pipeline or configuration gap that had to be
 
 ## 📚 Project Phases
 
-The lab is divided into five phases, each following the same loop: instrument, attack, hunt.
+The lab has seven phases. Phases 0 to 4 follow the same loop: instrument, attack, hunt. Phase 5 turns what I found into detections, and Phase 6 writes it up as an incident report.
 
 | # | Phase | Description |
 |---|---|---|
@@ -74,6 +74,8 @@ The lab is divided into five phases, each following the same loop: instrument, a
 | **02** | [Attack Path Mapping](./Phase-2-Attack-Path-Mapping/) | SharpHound + self-hosted BloodHound CE to graph and confirm a real privilege-escalation path |
 | **03** | [Lateral Movement & Escalation](./Phase-3-Lateral-Movement/) | Simulated GPO misconfiguration, SMB lateral movement, atexec code execution as SYSTEM |
 | **04** | [Persistence: DCSync & Golden Ticket](./Phase-4-DCSync-Golden-Ticket/) | Credential dumping, DCSync, Golden Ticket forging, and the detection gap it exposes |
+| **05** | [Detection Engineering](./Phase-5-Detection-Engineering/) | Hunt queries for every technique, then closing the DCSync and Golden Ticket gaps |
+| **06** | [Incident Report](./Phase-6-Incident-Report/) | The full attack chain written up as an incident report, with recommendations |
 
 ---
 
@@ -89,8 +91,8 @@ The lab is divided into five phases, each following the same loop: instrument, a
 | Valid Accounts / Local Admin Abuse | `T1078` | 3 | ✅ 4624 (Elevated Token) |
 | Remote Services (SMB/atexec) | `T1021.002` | 3 | ✅ Sysmon EID 1 (process lineage) |
 | OS Credential Dumping (LSASS) | `T1003.001` | 4 | 🔵 Not instrumented (finding) |
-| DCSync | `T1003.006` | 4 | ❌ Zero events — audit gap found |
-| Golden Ticket | `T1558.001` | 4 | ⚠️ One indistinguishable 4624 artifact |
+| DCSync | `T1003.006` | 4 | ❌ Zero events in Phase 4. Fixed in Phase 5B: 4662 auditing, plus an alert rule validated with a live alert in November 2026 |
+| Golden Ticket | `T1558.001` | 4 | ⚠️ One indistinguishable 4624 in Phase 4. Phase 5B adds a 4769-without-4768 correlation script |
 
 > ✅ = confirmed in Kibana · ⚠️ = partially visible / gap documented · ❌ = fully invisible, documented as a finding · 🔵 = not instrumented this phase
 
@@ -102,9 +104,9 @@ The lab is divided into five phases, each following the same loop: instrument, a
 |---|---|
 | **Windows Server 2022** | Domain Controller |
 | **Windows 10** | Domain-joined client endpoint |
-| **Elastic Stack (Elasticsearch, Kibana, Logstash)** | SIEM — log storage, search, and detection |
+| **Elastic Stack (Elasticsearch, Kibana, Logstash)** | SIEM: log storage, search, and detection |
 | **Winlogbeat / Filebeat** | Log shipping from endpoints to Elasticsearch |
-| **Sysmon (SwiftOnSecurity config)** | Endpoint telemetry — process, network, and file events |
+| **Sysmon (SwiftOnSecurity config)** | Endpoint telemetry: process, network, and file events |
 | **Group Policy** | PowerShell logging, Advanced Audit Policy, GPO-based misconfiguration simulation |
 | **Kali Linux** | Attacker platform |
 | **Responder** | LLMNR/NBT-NS poisoning |
@@ -118,7 +120,7 @@ The lab is divided into five phases, each following the same loop: instrument, a
 
 ## 📸 Screenshots & Evidence
 
-Screenshots and supporting evidence are stored per-phase in each phase's `/screenshots` directory.
+Each phase's screenshots are shown inline in its README, and most phases also keep the image files in a `Screenshots/` folder.
 
 Documented evidence includes:
 
@@ -148,26 +150,26 @@ Documented evidence includes:
 
 ## 🔎 Security Considerations
 
-Every phase paired an attack with an attempt to detect it — and, where detection failed, a documented reason why:
+Every phase paired an attack with an attempt to detect it, and, where detection failed, a documented reason why:
 
 - Sysmon Event ID 3/22 gaps left LLMNR poisoning partially invisible at the network layer
 - A misconfigured legacy Audit Policy silently overrode Advanced Audit Policy, breaking account-lockout logging
 - AES-only Kerberos enforcement and CVE-2021-42287 PAC validation both blocked naive Golden Ticket attempts, but a correctly-forged AES256 ticket with a real account name still succeeded
 - DCSync produced zero host-based events because Directory Service Access (4662) auditing was never enabled
-- BloodHound's own collector missed newly-granted local admin rights due to MY-LAB-PC's default SAMR enumeration restriction — a blind spot in the tooling itself, not the attack
+- BloodHound's own collector missed newly-granted local admin rights due to MY-LAB-PC's default SAMR enumeration restriction, a blind spot in the tooling itself, not the attack
 
 ---
 
 ## 🎓 What I Learned
 
 ### Detection Engineering
-Building the SIEM before attacking it showed how much of "having a SIEM" is really about which audit subcategories are enabled and which fields actually populate — not just having logs flowing.
+Building the SIEM before attacking it showed how much of "having a SIEM" is really about which audit subcategories are enabled and which fields actually populate, not just having logs flowing.
 
 ### Offensive Techniques
 Hands-on execution of the full AD credential-access-to-persistence chain, including how modern Server 2022 hardening (AES-only Kerberos, PAC account validation) changes classic attacks like Kerberoasting and Golden Ticket forging.
 
 ### The Detection Gap
-The single biggest lesson of the project: a well-tuned host-based SIEM can still leave an attack — DCSync and Golden Ticket in particular — completely invisible. Closing that gap requires Directory Service Access auditing, network-layer detection (Defender for Identity, Zeek, Suricata), and baseline rules like "4769 with no preceding 4768."
+The single biggest lesson of the project: a well-tuned host-based SIEM can still leave an attack, DCSync and Golden Ticket in particular, completely invisible. Closing that gap requires Directory Service Access auditing, network-layer detection (Defender for Identity, Zeek, Suricata), and baseline rules like "4769 with no preceding 4768."
 
 ### Troubleshooting
 Real infrastructure issues surfaced constantly: stale IPs and interface names after a network migration, a commented-out Winlogbeat output block, a legacy audit policy silently overriding the modern one, and firewall rules blocking inbound SMB.
@@ -177,40 +179,30 @@ Real infrastructure issues surfaced constantly: stale IPs and interface names af
 ## 🗂️ Repository Structure
 
 ```text
-Active-Directory-ELK-SOC-Lab/
-│
+03-Active-Directory-ELK-SIEM-Lab/
+├── README.md
 ├── Phase-0-Visibility-Foundation/
 │   ├── README.md
-│   └── screenshots/
-│
+│   └── Screenshots/
 ├── Phase-1-Credential-Access/
 │   ├── README.md
-│   ├── llmnr-poisoning-writeup.md
-│   ├── kerberoasting-linkedin-post.md
-│   ├── asrep-roasting-linkedin-post.md
-│   └── screenshots/
-│
+│   └── Screenshots/
 ├── Phase-2-Attack-Path-Mapping/
 │   ├── README.md
-│   ├── writeups/
-│   │   └── attack-path-explanation.md
-│   └── screenshots/
-│
+│   └── Screenshots/
 ├── Phase-3-Lateral-Movement/
-│   ├── README.md
-│   └── screenshots/
-│
+│   └── README.md
 ├── Phase-4-DCSync-Golden-Ticket/
 │   ├── README.md
-│   └── screenshots/
-│
+│   └── Screenshots/
 ├── Phase-5-Detection-Engineering/
-│   └── README.md
-│   
-├── Phase-6-Incident-Report/
-│   └── README.md
-│
-└── README.md
+│   ├── README.md
+│   ├── 5A-Hunt-Queries/
+│   └── 5B-Closing-The-Detection-Gaps/
+│       ├── Gap-1-DCSync-No-Audit-Trail/
+│       └── Gap-2-Golden-Ticket-No-Tripwire/
+└── Phase-6-Incident-Report/
+    └── README.md
 ```
 
 ---
@@ -219,11 +211,14 @@ Active-Directory-ELK-SOC-Lab/
 
 | Phase | Status |
 |---|---|
-| Phase 0 — Visibility Foundation | 🟢 Completed |
-| Phase 1 — Credential Access | 🟢 Completed |
-| Phase 2 — Attack Path Mapping | 🟢 Completed |
-| Phase 3 — Lateral Movement & Escalation | 🟢 Completed |
-| Phase 4 — DCSync & Golden Ticket | 🟢 Completed |
+| Phase 0: Visibility Foundation | 🟢 Completed |
+| Phase 1: Credential Access | 🟢 Completed |
+| Phase 2: Attack Path Mapping | 🟢 Completed |
+| Phase 3: Lateral Movement & Escalation | 🟢 Completed |
+| Phase 4: DCSync & Golden Ticket | 🟢 Completed |
+| Phase 5: Detection Engineering | 🟢 Completed |
+| Phase 6: Incident Report | 🟢 Completed |
+| Automated validation with Caldera ([Purple-Team-Automation](https://github.com/joshuagodwin7929/Purple-Team-Automation)) | 🟢 Completed |
 | Network-Layer Detection (Zeek/Suricata) | 🔵 Planned |
 | Automated Pipeline (SharpHound → BloodHound) | 🔵 Planned |
 | krbtgt Rotation & Remediation Pass | 🔵 Planned |
@@ -238,9 +233,9 @@ Active-Directory-ELK-SOC-Lab/
 
 ## 🚀 Future Improvements
 
-- [ ] Enable Directory Service Access (4662) auditing with replication GUID filters to close the DCSync blind spot
+- [x] Enable Directory Service Access (4662) auditing with replication GUID filters to close the DCSync blind spot (Phase 5B)
 - [ ] Add network-layer detection (Zeek/Suricata or Defender for Identity) for LLMNR poisoning and Golden Ticket traffic
-- [ ] Build a Kibana detection rule for "4769 with no preceding 4768" (forged ticket indicator)
+- [x] Build a "4769 with no preceding 4768" detection (forged ticket indicator). Built as a Python script in Phase 5B, because Kibana query rules can't express it
 - [ ] Automate the SharpHound → BloodHound collection pipeline end-to-end
 - [ ] Rotate krbtgt twice (spaced by max ticket lifetime) and re-verify the attack path is closed
 - [ ] Fix the Sysmon Event ID 3/22 gap on MY-LAB-PC for full LLMNR visibility
@@ -250,7 +245,7 @@ Active-Directory-ELK-SOC-Lab/
 
 ## 💡 Why I Built This
 
-Most of my earlier lab work treated defense and offense as separate skills. This project deliberately fuses them: build the detection layer first, then attack it, so every finding is grounded in what a real SOC analyst would actually see — or not see — in Kibana.
+Most of my earlier lab work treated defense and offense as separate skills. This project deliberately fuses them: build the detection layer first, then attack it, so every finding is grounded in what a real SOC analyst would actually see, or not see, in Kibana.
 
 The goal wasn't to run tools and get a hash; it was to trace each attack all the way through the logging pipeline and be honest about where visibility broke down.
 
@@ -260,8 +255,10 @@ The goal wasn't to run tools and get a hash; it was to trace each attack all the
 
 | Project | Description |
 |---|---|
-| [🏢 Active Directory Homelab](../Active-Directory-Homelab/) | The enterprise-style AD identity and infrastructure environment this lab is built on top of |
-| [🛡️ Cybersecurity-Labs](../) | View all cybersecurity homelab projects |
+| [🏢 Active Directory Homelab](../01-Active-Directory-Homelab/) | The enterprise-style AD identity and infrastructure environment this lab is built on top of |
+| [🔍 Detection-Engineering](https://github.com/joshuagodwin7929/Detection-Engineering) | The Sigma rules this lab's hunt queries became, with CI |
+| [🟣 Purple-Team-Automation](https://github.com/joshuagodwin7929/Purple-Team-Automation) | Automated Caldera attacks that validated those rules with live alerts |
+| [🛡️ AD-Attack-Defense-Lab](../) | All the labs in this repo |
 
 ---
 
@@ -269,8 +266,8 @@ The goal wasn't to run tools and get a hash; it was to trace each attack all the
 
 **SIEM • Active Directory • Detection Engineering • Adversary Emulation**
 
-This lab demonstrates end-to-end hands-on experience building a SIEM from scratch and using it to detect — and honestly assess the limits of detecting — a full AD attack chain from initial credential access through domain persistence.
+This lab demonstrates end-to-end hands-on experience building a SIEM from scratch and using it to detect, and honestly assess the limits of detecting, a full AD attack chain from initial credential access through domain persistence.
 
 ---
 
-[← Back to Cybersecurity-Labs](../)
+[← Back to AD-Attack-Defense-Lab](../)
