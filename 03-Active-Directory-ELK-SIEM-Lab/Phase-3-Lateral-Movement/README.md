@@ -146,7 +146,6 @@ The resulting Sysmon Event ID 1 landed **61 milliseconds** after the logon event
 > Screenshots below are redacted of internal IPs, hostnames where sensitive, and credentials, per this project's standard OPSEC practice for public write-ups.
 
 ### GPO Configuration
-`screenshots/phase3/01-gpo-restricted-groups.png`
 *Restricted Groups configuration granting scoped local admin rights on the target workstation only.*
 
 
@@ -158,7 +157,6 @@ The resulting Sysmon Event ID 1 landed **61 milliseconds** after the logon event
 
 
 ### Security Filtering Scope
-`screenshots/phase3/02-security-filtering.png`
 *GPO Security Filtering limited to the target computer object, confirming no domain-wide impact.*
 
 
@@ -166,11 +164,9 @@ The resulting Sysmon Event ID 1 landed **61 milliseconds** after the logon event
 
 
 ### Firewall Root Cause
-`screenshots/phase3/03-firewall-rule-disabled.png`
 *Domain-profile SMB-In rule found disabled — the actual blocker for initial lateral movement attempts.*
 
 ### Confirmed Admin Access
-`screenshots/phase3/04-netexec-pwn3d.png`
 *NetExec confirming `(Pwn3d!)` admin-level SMB access using the compromised low-privilege credential.*
 
 
@@ -178,7 +174,6 @@ The resulting Sysmon Event ID 1 landed **61 milliseconds** after the logon event
 
 
 ### Remote Execution Fallback
-`screenshots/phase3/05-atexec-fallback.png`
 *WMI execution failure followed by automatic fallback to atexec, returning `nt authority\system`.*
 
 
@@ -186,14 +181,12 @@ The resulting Sysmon Event ID 1 landed **61 milliseconds** after the logon event
 
 
 ### Kibana: Lateral Movement Logon (4624)
-`screenshots/phase3/06-kibana-4624-logon.png`
 *Type 3 network logon, Elevated Token: Yes, fully attributed to the compromised account.*
 
 <img width="638" height="735" alt="06-kibana-4624-logon" src="https://github.com/user-attachments/assets/c05964fd-d006-4e4b-8a71-15a5fd912d79" />
 
 
 ### Kibana: Process Creation Artifact (Sysmon Event ID 1)
-`screenshots/phase3/07-kibana-sysmon-whoami.png`
 *`whoami.exe` spawned by `cmd.exe`, spawned by `svchost.exe -k netsvcs`, output redirected to a random temp file — the atexec forensic signature — timestamped 61ms after the logon event.*
 
 

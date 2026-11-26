@@ -1,4 +1,4 @@
-# Elastic-SIEM-Labs
+# AD-Attack-Defense-Lab
 
 By OKUNNUWA JOSHUA GODWIN | [LinkedIn](https://www.linkedin.com/in/okunnuwa-joshua-godwin)
 
@@ -41,7 +41,7 @@ Most phases answer the same questions: what I built, why, which technologies, ho
 ## Repo layout
 
 ```text
-Elastic-SIEM-Labs/
+AD-Attack-Defense-Lab/
 ├── 01-Active-Directory-Homelab/
 ├── 02-SIEM-Lab-ELK-Stack/
 ├── 03-Active-Directory-ELK-SIEM-Lab/

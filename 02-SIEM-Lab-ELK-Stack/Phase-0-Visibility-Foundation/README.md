@@ -132,7 +132,6 @@ In Kibana, created a `winlogbeat-*` data view and confirmed:
 ```
 event.code:4624
 ```
-> Screenshots below are organized by step. Replace the placeholder paths with your own images (recommend a `/screenshots` folder in this repo, referenced as `./screenshots/filename.png`).
  
 ### Sysmon Deployment
 ![Sysmon service running and generating events](https://github.com/user-attachments/assets/c25ae283-375d-45ba-9413-b88117b22632)

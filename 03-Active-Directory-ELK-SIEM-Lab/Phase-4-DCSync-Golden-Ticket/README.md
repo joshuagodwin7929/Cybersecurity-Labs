@@ -613,34 +613,20 @@ are detection dependencies, not just operational ones.
 
 ---
 
-## 📁 Repository Structure
+## 📁 Folder Structure
 
 ```
-Phase4-DCSync-GoldenTicket/
-│
-├── README.md                        ← This file
-├── screenshots/
-│   ├── lsassy-administrator-hash.png
-│   ├── dcsync-krbtgt-output.png
-│   ├── lookupsid-domain-sid.png
-│   ├── golden-ticket-forge.png
-│   ├── describe-ticket-output.png
-│   ├── dc-share-access-golden-ticket.png
-│   ├── kibana-no-4662-dcsync.png
-│   └── kibana-4624-golden-ticket-logon.png
-│
-├── detection-notes/
-│   ├── T1003.006-dcsync-detection.md
-│   └── T1558.001-golden-ticket-detection.md
-│
-├── kibana-queries/
-│   ├── dcsync-hunt.kql
-│   ├── golden-ticket-hunt.kql
-│   └── logon-from-kali.kql
-│
-└── configs/
-    ├── winlogbeat-dc.yml
-    └── krb5.conf
+Phase-4-DCSync-Golden-Ticket/
+├── README.md
+└── Screenshots/
+    ├── 01-lsassy-administrator-hash/
+    ├── 02-dcsync-krbtgt-output/
+    ├── 03-lookupsid-domain-sid/
+    ├── 04-golden-ticket-forge/
+    ├── 05-describe-ticket-output/
+    ├── 06-dc-share-access-golden-ticket/
+    ├── 07-kibana-no-4662-dcsync/
+    └── 08-kibana-4624-golden-ticket-logon/
 ```
 
 ---

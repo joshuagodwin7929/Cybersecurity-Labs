@@ -8,7 +8,7 @@ The part 1, 2, 3 covered building and hardening the stack itself: Docker Compose
  
 ## 📋 Table of Contents
  
-- [What This Phase Covers](#-what-this-phase-covers)
+- [What This Part Covers](#-what-this-part-covers)
 - [1. Named, Least-Privilege Users & Roles](#1-named-least-privilege-users--roles)
 - [2. Index Lifecycle Management (ILM)](#2-index-lifecycle-management-ilm)
 - [3. Dashboards](#3-dashboards)

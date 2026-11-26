@@ -258,7 +258,7 @@ The goal wasn't to run tools and get a hash; it was to trace each attack all the
 | [🏢 Active Directory Homelab](../01-Active-Directory-Homelab/) | The enterprise-style AD identity and infrastructure environment this lab is built on top of |
 | [🔍 Detection-Engineering](https://github.com/joshuagodwin7929/Detection-Engineering) | The Sigma rules this lab's hunt queries became, with CI |
 | [🟣 Purple-Team-Automation](https://github.com/joshuagodwin7929/Purple-Team-Automation) | Automated Caldera attacks that validated those rules with live alerts |
-| [🛡️ Elastic-SIEM-Labs](../) | All the labs in this repo |
+| [🛡️ AD-Attack-Defense-Lab](../) | All the labs in this repo |
 
 ---
 
@@ -270,4 +270,4 @@ This lab demonstrates end-to-end hands-on experience building a SIEM from scratc
 
 ---
 
-[← Back to Elastic-SIEM-Labs](../)
+[← Back to AD-Attack-Defense-Lab](../)
