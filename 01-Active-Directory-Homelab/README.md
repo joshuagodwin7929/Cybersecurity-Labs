@@ -1,4 +1,4 @@
-# 🏢 Active Directory Homelab
+# Active Directory Homelab
 
 > Enterprise-style Windows identity and infrastructure lab designed to simulate a small organization's Active Directory, identity, access control, and Windows infrastructure.
 
@@ -9,7 +9,7 @@
 
 ---
 
-## 🎯 Project Overview
+## Project Overview
 
 This project simulates an enterprise Active Directory environment built to develop practical skills in:
 
@@ -27,7 +27,7 @@ The goal is to build the environment from the ground up while documenting the co
 
 ---
 
-## 🏗️ Lab Environment
+## Lab Environment
 
 | Component | Details |
 |---|---|
@@ -41,7 +41,7 @@ The goal is to build the environment from the ground up while documenting the co
 
 ---
 
-## 🗺️ Lab Architecture
+## Lab Architecture
 
 ```text
                          ┌─────────────────────┐
@@ -85,7 +85,7 @@ The goal is to build the environment from the ground up while documenting the co
 
 ---
 
-## 📚 Project Modules
+## Project Modules
 
 The lab is divided into six major modules.
 
@@ -100,7 +100,7 @@ The lab is divided into six major modules.
 
 ---
 
-## 🔐 Security Concepts Demonstrated
+## Security Concepts Demonstrated
 
 ### Identity & Access
 
@@ -141,7 +141,7 @@ The lab is divided into six major modules.
 
 ---
 
-## 🛠️ Technologies Used
+## Technologies Used
 
 | Technology | Purpose |
 |---|---|
@@ -157,7 +157,7 @@ The lab is divided into six major modules.
 
 ---
 
-## 📸 Screenshots & Evidence
+## Screenshots & Evidence
 
 Screenshots and supporting evidence are stored in the [`Images`](./Images/) directory.
 
@@ -196,7 +196,7 @@ Documented screenshots include:
 
 ---
 
-## 🧠 Skills Developed
+## Skills Developed
 
 This project provided hands-on experience with:
 
@@ -219,7 +219,7 @@ This project provided hands-on experience with:
 
 ---
 
-## 🔎 Security Considerations
+## Security Considerations
 
 Security was considered throughout the design of the environment.
 
@@ -237,7 +237,7 @@ Key areas include:
 
 ---
 
-## 🎓 What I Learned
+## What I Learned
 
 Building this environment helped me understand how the different components of an enterprise Windows environment work together.
 
@@ -285,7 +285,7 @@ The lab also required troubleshooting issues involving:
 
 ---
 
-## 🗂️ Repository Structure
+## Repository Structure
 
 ```text
 Active-Directory-Homelab/
@@ -322,29 +322,23 @@ Active-Directory-Homelab/
 
 ---
 
-## 📊 Project Status
+## Project Status
 
 | Component | Status |
 |---|---|
-| Core Infrastructure | 🟢 Completed |
-| Users & OUs | 🟢 Completed |
-| Certificate Services | 🟢 Completed |
-| Client Domain Join | 🟢 Completed |
-| Group Policies | 🟢 Completed |
-| File Server & Shares | 🟢 Completed |
-| Security Monitoring | 🟡 In Progress |
-| Detection Engineering | 🔵 Planned |
-| Incident Response | 🔵 Planned |
-
-### Legend
-
-- 🟢 **Completed**
-- 🟡 **In Progress**
-- 🔵 **Planned**
+| Core Infrastructure | Completed |
+| Users & OUs | Completed |
+| Certificate Services | Completed |
+| Client Domain Join | Completed |
+| Group Policies | Completed |
+| File Server & Shares | Completed |
+| Security Monitoring | In Progress |
+| Detection Engineering | Planned |
+| Incident Response | Planned |
 
 ---
 
-## 🗺️ MITRE ATT&CK
+## MITRE ATT&CK
 
 As security-focused scenarios are added to the lab, relevant MITRE ATT&CK techniques will be documented here.
 
@@ -359,28 +353,28 @@ As security-focused scenarios are added to the lab, relevant MITRE ATT&CK techni
 
 ---
 
-## 🚀 Future Improvements
+## Future Improvements
 
 The environment will continue to evolve into a broader security monitoring and detection lab.
 
 ### Planned Additions
 
-- [ ] Windows Event Forwarding
-- [ ] Sysmon
-- [ ] Wazuh
-- [ ] SIEM integration
-- [ ] Active Directory attack simulations
-- [ ] Detection engineering
-- [ ] MITRE ATT&CK mapping
-- [ ] BloodHound analysis
-- [ ] PowerShell automation
-- [ ] Incident response exercises
-- [ ] Windows security monitoring
-- [ ] Threat hunting
+- [] Windows Event Forwarding
+- [] Sysmon
+- [] Wazuh
+- [] SIEM integration
+- [] Active Directory attack simulations
+- [] Detection engineering
+- [] MITRE ATT&CK mapping
+- [] BloodHound analysis
+- [] PowerShell automation
+- [] Incident response exercises
+- [] Windows security monitoring
+- [] Threat hunting
 
 ---
 
-## 💡 Why I Built This
+## Why I Built This
 
 Most of my early cybersecurity learning happened one concept at a time.
 
@@ -390,16 +384,16 @@ The goal is not simply to follow tutorials, but to build, troubleshoot, document
 
 ---
 
-## 🔗 Related Projects
+## Related Projects
 
 | Project | Description |
 |---|---|
-| [📊 SIEM Lab – ELK Stack](../02-SIEM-Lab-ELK-Stack/) | Centralized security monitoring and log analysis |
-| [🛡️ AD-Attack-Defense-Lab](../) | All the labs in this repo |
+| [SIEM Lab – ELK Stack](../02-SIEM-Lab-ELK-Stack/) | Centralized security monitoring and log analysis |
+| [AD-Attack-Defense-Lab](../) | All the labs in this repo |
 
 ---
 
-## 🛡️ Project Summary
+## Project Summary
 
 **Identity • Windows • Infrastructure • Security**
 

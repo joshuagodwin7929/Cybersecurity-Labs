@@ -1,30 +1,30 @@
-# SIEM Lab — Elastic Stack (ELK) Deployment with TLS & Log Ingestion
+# SIEM Lab: Elastic Stack (ELK) Deployment with TLS & Log Ingestion
 
-**TL;DR:** A hardened, TLS-secured Elastic Stack SIEM lab — built, encrypted end-to-end, connected to a live log source, and debugged from scratch. Includes real issues hit along the way and how they were diagnosed and fixed (see [Troubleshooting Notes](#-troubleshooting-notes-real-issues-encountered)).
+**TL;DR:** A hardened, TLS-secured Elastic Stack SIEM lab, built, encrypted end-to-end, connected to a live log source, and debugged from scratch. Includes real issues hit along the way and how they were diagnosed and fixed (see [Troubleshooting Notes](#troubleshooting-notes-real-issues-encountered)).
 
 A SIEM (Security Information and Event Management) system is what security teams use to collect logs from across an organization's servers and devices, then search, monitor, and alert on that data to catch suspicious activity. This repo documents a self-hosted, security-hardened Elastic Stack (Elasticsearch, Logstash, Kibana) deployed via Docker Compose, with end-to-end TLS encryption and a live log ingestion pipeline from a real Linux host using Filebeat.
 
-This project was built as a hands-on cybersecurity lab to practice the same architecture used in real-world SIEM deployments — from infrastructure setup, to security hardening, to actual log analysis.
+This project was built as a hands-on cybersecurity lab to practice the same architecture used in real-world SIEM deployments, from infrastructure setup, to security hardening, to actual log analysis.
 
 ---
 
-## 📋 Table of Contents
+## Table of Contents
 
-- [Architecture](#-architecture)
+- [Architecture](#architecture)
 - [Prerequisites](#-prerequisites)
-- [Project Structure](#-project-structure)
+- [Project Structure](#project-structure)
 - [Part 1: Base Deployment](#part-1-base-deployment)
 - [Part 2: Security Hardening (TLS)](#part-2-security-hardening-tls)
 - [Part 3: Log Ingestion Pipeline](#part-3-log-ingestion-pipeline)
 - [Verification](#-verification)
-- [Troubleshooting Notes](#-troubleshooting-notes-real-issues-encountered)
-- [Lessons Learned](#-lessons-learned)
-- [Roadmap](#-roadmap)
-- [Screenshots](#-screenshots)
+- [Troubleshooting Notes](#troubleshooting-notes-real-issues-encountered)
+- [Lessons Learned](#lessons-learned)
+- [Roadmap](#roadmap)
+- [Screenshots](#screenshots)
 
 ---
 
-## 🏗 Architecture
+## Architecture
 
 ```
 ┌─────────────────┐     ┌──────────────┐     ┌───────────────┐     ┌─────────┐
@@ -51,7 +51,7 @@ All inter-service traffic (Logstash→Elasticsearch, Kibana→Elasticsearch) and
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 elk-stack/
@@ -67,7 +67,7 @@ elk-stack/
 └── kibana/
 ```
 
-> ⚠️ **Never commit the `certs/` folder or real passwords to a public repository.** This README uses lab-only placeholder credentials for illustration.
+> ⚠ **Never commit the `certs/` folder or real passwords to a public repository.** This README uses lab-only placeholder credentials for illustration.
 
 ---
 
@@ -76,8 +76,8 @@ elk-stack/
 The stack is defined in a single `docker-compose.yml` with three services: `elasticsearch`, `logstash`, and `kibana`, all sharing a Docker bridge network (`elk-net`).
 
 Key base configuration:
-- Single-node Elasticsearch (`discovery.type=single-node`) — appropriate for a lab, not production
-- `xpack.security.enabled=true` from the start — authentication is on by default in modern Elastic Stack versions
+- Single-node Elasticsearch (`discovery.type=single-node`), appropriate for a lab, not production
+- `xpack.security.enabled=true` from the start, authentication is on by default in modern Elastic Stack versions
 - A named Docker volume (`es_data`) persists Elasticsearch's data across restarts
 
 ```bash
@@ -85,18 +85,18 @@ docker compose up -d
 docker ps   # confirm all three containers are Up
 ```
 
-📸 *[Screenshot: `docker ps` showing all three containers running]*
+ *[Screenshot: `docker ps` showing all three containers running]*
 <img width="1269" height="525" alt="Logstash-Elasticsearch-Kibana" src="https://github.com/user-attachments/assets/d65eac04-f3e2-416d-a6eb-02edb2c22400" />
 
 
-📸 *[Screenshot: initial Kibana login page over plain HTTP]*
+ *[Screenshot: initial Kibana login page over plain HTTP]*
 <img width="1279" height="737" alt="HTTP login page" src="https://github.com/user-attachments/assets/cd9bb3d5-6625-4f5d-ac21-4a1c87967156" />
 
 ---
 
 ## Part 2: Security Hardening (TLS)
 
-By default, this stack only had authentication enabled — traffic itself was still unencrypted. The following hardening was applied in stages.
+By default, this stack only had authentication enabled, traffic itself was still unencrypted. The following hardening was applied in stages.
 
 ### 2.1 Verifying Security Enforcement
 
@@ -105,7 +105,7 @@ curl http://localhost:9200/_cluster/health
 # → 401 security_exception: missing authentication credentials
 ```
 
-📸 *[Screenshot: 401 response confirming security is enforced]*
+ *[Screenshot: 401 response confirming security is enforced]*
 <img width="1273" height="779" alt="Docker Compose Health check" src="https://github.com/user-attachments/assets/e5855ae3-0621-471b-ab72-e42327bd16c9" />
 
 
@@ -131,9 +131,9 @@ docker exec elasticsearch bin/elasticsearch-certutil cert \
   --name kibana --dns kibana --dns localhost --ip 127.0.0.1
 ```
 
-Certificates are then copied out of the container onto the host (`docker cp`) into `elasticsearch/certs/`, so they persist and can be mounted into every service — container `/tmp` storage does **not** survive a container recreate.
+Certificates are then copied out of the container onto the host (`docker cp`) into `elasticsearch/certs/`, so they persist and can be mounted into every service, container `/tmp` storage does **not** survive a container recreate.
 
-📸 *[Screenshot: certificate files listed in `elasticsearch/certs/`]*
+ *[Screenshot: certificate files listed in `elasticsearch/certs/`]*
 <img width="1265" height="772" alt="Creating CA HTTPS Certificates" src="https://github.com/user-attachments/assets/5402b230-53a9-42b0-a650-ce77725f5e81" />
 
 
@@ -150,7 +150,7 @@ With the certs folder mounted as a volume into `/usr/share/elasticsearch/config/
 
 ### 2.4 Enabling HTTPS on Kibana (both legs)
 
-Two separate things had to be configured — easy to miss one:
+Two separate things had to be configured, easy to miss one:
 
 **Kibana → Elasticsearch** (Kibana as a client):
 ```yaml
@@ -165,18 +165,18 @@ Two separate things had to be configured — easy to miss one:
 - SERVER_SSL_KEY=/usr/share/kibana/config/certs/kibana.key
 ```
 
-📸 *[Screenshot: Kibana loading over HTTPS with self-signed cert warning]*
+ *[Screenshot: Kibana loading over HTTPS with self-signed cert warning]*
 <img width="1260" height="722" alt="Kibana HTTPS warning" src="https://github.com/user-attachments/assets/527e6442-04ec-472d-826d-8410df411be0" />
 
 
-📸 *[Screenshot: successful Kibana login over HTTPS]*
+ *[Screenshot: successful Kibana login over HTTPS]*
 <img width="1267" height="737" alt="Kibana Homepage" src="https://github.com/user-attachments/assets/efa20311-576c-4666-bd4e-cb8695bb88de" />
 
 ---
 
 ## Part 3: Log Ingestion Pipeline
 
-With the stack secured, the next step was ingesting real data — this server's own system logs — via Filebeat.
+With the stack secured, the next step was ingesting real data, this server's own system logs, via Filebeat.
 
 ### 3.1 Filebeat (installed on the host, not in Docker)
 
@@ -224,7 +224,7 @@ output {
 
 In **Stack Management → Data Views**, a data view was created for `filebeat-lab-*` with `@timestamp` as the time field, exposing 61 auto-detected fields from the ingested documents.
 
-📸 *[Screenshot: Data View creation screen showing matched index]*
+ *[Screenshot: Data View creation screen showing matched index]*
 <img width="635" height="381" alt="Filebeat Dataview" src="https://github.com/user-attachments/assets/4ee04da0-092a-4d37-b7a3-a182fb945f79" />
 
 
@@ -238,12 +238,12 @@ curl -k -u elastic:<mypassword> https://myhostip:9200/_cat/indices?v
 ```
 Confirms the `filebeat-lab-*` index exists with a non-zero document count.
 
-📸 *[Screenshot: Kibana Discover showing 500 hits of real log data]*
+ *[Screenshot: Kibana Discover showing 500 hits of real log data]*
 <img width="1259" height="484" alt="file beat confirmed" src="https://github.com/user-attachments/assets/c51988c8-2a49-4230-967f-2ca03b3dd92f" />
 
 ---
 
-## 🐛 Troubleshooting Notes (real issues encountered)
+## Troubleshooting Notes (real issues encountered)
 
 | Issue | Root Cause | Fix |
 |---|---|---|
@@ -256,17 +256,17 @@ Confirms the `filebeat-lab-*` index exists with a non-zero document count.
 
 ---
 
-## 🎓 Lessons Learned
+## Lessons Learned
 
-- **A single YAML indentation error can silently break a config section without an obvious error message** — always validate with `docker compose config` after edits.
+- **A single YAML indentation error can silently break a config section without an obvious error message**: always validate with `docker compose config` after edits.
 - **Container `/tmp` is ephemeral.** Anything needed long-term must be copied to a mounted volume.
-- **A plugin silently accepting a setting doesn't guarantee it's using it correctly** — when behavior doesn't match configuration, enable debug logging and read what the process actually resolved at startup.
-- **Match component major versions** — a newer Beat (9.x) is not guaranteed to work against an older Elasticsearch cluster (8.x).
-- **Kibana's browser-facing TLS and its outbound TLS to Elasticsearch are two separate settings** — enabling one does not enable the other.
+- **A plugin silently accepting a setting doesn't guarantee it's using it correctly**: when behavior doesn't match configuration, enable debug logging and read what the process actually resolved at startup.
+- **Match component major versions**: a newer Beat (9.x) is not guaranteed to work against an older Elasticsearch cluster (8.x).
+- **Kibana's browser-facing TLS and its outbound TLS to Elasticsearch are two separate settings**: enabling one does not enable the other.
 
 ---
 
-## 🗺 Roadmap
+## Roadmap
 
 - [x] Base Elastic Stack deployment via Docker Compose
 - [x] Enable authentication and verify enforcement
@@ -276,20 +276,20 @@ Confirms the `filebeat-lab-*` index exists with a non-zero document count.
 - [x] Install and configure Filebeat on the host
 - [x] Build a Logstash pipeline to receive and forward Beats data
 - [x] Confirm real log data flowing end-to-end into Kibana
-- [ ] Create named, least-privilege users and roles (scoped to `filebeat-lab-*`)
-- [ ] Set up Index Lifecycle Management (ILM) for automatic rollover/cleanup
-- [ ] Build dashboards for log volume, top event types, and auth activity
-- [ ] Learn to identify suspicious authentication activity (brute-force patterns, privilege escalation)
-- [ ] Set up snapshot-based backups
+- [] Create named, least-privilege users and roles (scoped to `filebeat-lab-*`)
+- [] Set up Index Lifecycle Management (ILM) for automatic rollover/cleanup
+- [] Build dashboards for log volume, top event types, and auth activity
+- [] Learn to identify suspicious authentication activity (brute-force patterns, privilege escalation)
+- [] Set up snapshot-based backups
 
 ---
 
-## 📸 Screenshots
+## Screenshots
 
 Screenshots are inline in each section above.
 
 ---
 
-## 🔐 Security Disclaimer
+## Security Disclaimer
 
 This is a personal lab environment. Passwords, certificates, and configurations shown here are for demonstration only and should never be reused in a production environment. Always use strong, unique credentials and properly issued (non-self-signed) certificates outside of a lab context.

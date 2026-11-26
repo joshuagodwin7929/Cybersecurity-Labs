@@ -1,4 +1,4 @@
-# 🛡️ Active Directory ELK SIEM Lab
+# Active Directory ELK SIEM Lab
 
 > A self-hosted Active Directory attack/defense lab built to simulate a real SOC workflow: instrument a domain with an Elastic Stack SIEM, then run a phased adversary emulation against it (credential access → attack path mapping → lateral movement → domain persistence), hunting for each technique in Kibana as it happens.
 
@@ -10,7 +10,7 @@
 
 ---
 
-## 🎯 Project Overview
+## Project Overview
 
 This project builds the detection layer first, then attacks it by mirroring the real relationship between red and blue teams. It simulates an enterprise domain, instruments it with a self-hosted SIEM, and then runs a full credential-access-to-domain-compromise chain against it, one technique at a time: **log first, attack second, hunt third.**
 
@@ -26,7 +26,7 @@ Every phase found at least one real pipeline or configuration gap that had to be
 
 ---
 
-## 🏗️ Lab Environment
+## Lab Environment
 
 | Component | Details |
 |---|---|
@@ -40,7 +40,7 @@ Every phase found at least one real pipeline or configuration gap that had to be
 
 ---
 
-## 🗺️ Lab Architecture
+## Lab Architecture
 
 ```text
                     ┌────────────────────────────┐
@@ -63,7 +63,7 @@ Every phase found at least one real pipeline or configuration gap that had to be
 
 ---
 
-## 📚 Project Phases
+## Project Phases
 
 The lab has seven phases. Phases 0 to 4 follow the same loop: instrument, attack, hunt. Phase 5 turns what I found into detections, and Phase 6 writes it up as an incident report.
 
@@ -79,26 +79,26 @@ The lab has seven phases. Phases 0 to 4 follow the same loop: instrument, attack
 
 ---
 
-## 🔐 Techniques & MITRE ATT&CK Mapping
+## Techniques & MITRE ATT&CK Mapping
 
 | Technique | ATT&CK ID | Phase | Detected in Kibana? |
 |---|---|---|---|
-| LLMNR/NBT-NS Poisoning | `T1557.001` | 1 | ⚠️ Partial (network-layer gap found) |
+| LLMNR/NBT-NS Poisoning | `T1557.001` | 1 | ⚠ Partial (network-layer gap found) |
 | Password Spraying | `T1110.003` | 1 | ✅ 4625 / 4740 |
 | Kerberoasting | `T1558.003` | 1 | ✅ 4769 (RC4 ticket type) |
 | AS-REP Roasting | `T1558.004` | 1 | ✅ 4768 (PreAuthType 0) |
-| Attack Path Enumeration (BloodHound) | `T1069` / `T1087` | 2 | 🔵 Not instrumented (finding) |
+| Attack Path Enumeration (BloodHound) | `T1069` / `T1087` | 2 | Not instrumented (finding) |
 | Valid Accounts / Local Admin Abuse | `T1078` | 3 | ✅ 4624 (Elevated Token) |
 | Remote Services (SMB/atexec) | `T1021.002` | 3 | ✅ Sysmon EID 1 (process lineage) |
-| OS Credential Dumping (LSASS) | `T1003.001` | 4 | 🔵 Not instrumented (finding) |
+| OS Credential Dumping (LSASS) | `T1003.001` | 4 | Not instrumented (finding) |
 | DCSync | `T1003.006` | 4 | ❌ Zero events in Phase 4. Fixed in Phase 5B: 4662 auditing, plus an alert rule validated with a live alert in November 2026 |
-| Golden Ticket | `T1558.001` | 4 | ⚠️ One indistinguishable 4624 in Phase 4. Phase 5B adds a 4769-without-4768 correlation script |
+| Golden Ticket | `T1558.001` | 4 | ⚠ One indistinguishable 4624 in Phase 4. Phase 5B adds a 4769-without-4768 correlation script |
 
-> ✅ = confirmed in Kibana · ⚠️ = partially visible / gap documented · ❌ = fully invisible, documented as a finding · 🔵 = not instrumented this phase
+> ✅ = confirmed in Kibana · ⚠ = partially visible / gap documented · ❌ = fully invisible, documented as a finding · = not instrumented this phase
 
 ---
 
-## 🛠️ Technologies Used
+## Technologies Used
 
 | Technology | Purpose |
 |---|---|
@@ -118,7 +118,7 @@ The lab has seven phases. Phases 0 to 4 follow the same loop: instrument, attack
 
 ---
 
-## 📸 Screenshots & Evidence
+## Screenshots & Evidence
 
 Each phase's screenshots are shown inline in its README, and most phases also keep the image files in a `Screenshots/` folder.
 
@@ -134,7 +134,7 @@ Documented evidence includes:
 
 ---
 
-## 🧠 Skills Developed
+## Skills Developed
 
 - Elastic Stack deployment, TLS configuration, and Winlogbeat pipeline troubleshooting
 - Sysmon and Windows Advanced Audit Policy configuration and validation
@@ -148,7 +148,7 @@ Documented evidence includes:
 
 ---
 
-## 🔎 Security Considerations
+## Security Considerations
 
 Every phase paired an attack with an attempt to detect it, and, where detection failed, a documented reason why:
 
@@ -160,7 +160,7 @@ Every phase paired an attack with an attempt to detect it, and, where detection 
 
 ---
 
-## 🎓 What I Learned
+## What I Learned
 
 ### Detection Engineering
 Building the SIEM before attacking it showed how much of "having a SIEM" is really about which audit subcategories are enabled and which fields actually populate, not just having logs flowing.
@@ -176,7 +176,7 @@ Real infrastructure issues surfaced constantly: stale IPs and interface names af
 
 ---
 
-## 🗂️ Repository Structure
+## Repository Structure
 
 ```text
 03-Active-Directory-ELK-SIEM-Lab/
@@ -207,43 +207,37 @@ Real infrastructure issues surfaced constantly: stale IPs and interface names af
 
 ---
 
-## 📊 Project Status
+## Project Status
 
 | Phase | Status |
 |---|---|
-| Phase 0: Visibility Foundation | 🟢 Completed |
-| Phase 1: Credential Access | 🟢 Completed |
-| Phase 2: Attack Path Mapping | 🟢 Completed |
-| Phase 3: Lateral Movement & Escalation | 🟢 Completed |
-| Phase 4: DCSync & Golden Ticket | 🟢 Completed |
-| Phase 5: Detection Engineering | 🟢 Completed |
-| Phase 6: Incident Report | 🟢 Completed |
-| Automated validation with Caldera ([Purple-Team-Automation](https://github.com/joshuagodwin7929/Purple-Team-Automation)) | 🟢 Completed |
-| Network-Layer Detection (Zeek/Suricata) | 🔵 Planned |
-| Automated Pipeline (SharpHound → BloodHound) | 🔵 Planned |
-| krbtgt Rotation & Remediation Pass | 🔵 Planned |
-
-### Legend
-
-- 🟢 **Completed**
-- 🟡 **In Progress**
-- 🔵 **Planned**
+| Phase 0: Visibility Foundation | Completed |
+| Phase 1: Credential Access | Completed |
+| Phase 2: Attack Path Mapping | Completed |
+| Phase 3: Lateral Movement & Escalation | Completed |
+| Phase 4: DCSync & Golden Ticket | Completed |
+| Phase 5: Detection Engineering | Completed |
+| Phase 6: Incident Report | Completed |
+| Automated validation with Caldera ([Purple-Team-Automation](https://github.com/joshuagodwin7929/Purple-Team-Automation)) | Completed |
+| Network-Layer Detection (Zeek/Suricata) | Planned |
+| Automated Pipeline (SharpHound → BloodHound) | Planned |
+| krbtgt Rotation & Remediation Pass | Planned |
 
 ---
 
-## 🚀 Future Improvements
+## Future Improvements
 
 - [x] Enable Directory Service Access (4662) auditing with replication GUID filters to close the DCSync blind spot (Phase 5B)
-- [ ] Add network-layer detection (Zeek/Suricata or Defender for Identity) for LLMNR poisoning and Golden Ticket traffic
+- [] Add network-layer detection (Zeek/Suricata or Defender for Identity) for LLMNR poisoning and Golden Ticket traffic
 - [x] Build a "4769 with no preceding 4768" detection (forged ticket indicator). Built as a Python script in Phase 5B, because Kibana query rules can't express it
-- [ ] Automate the SharpHound → BloodHound collection pipeline end-to-end
-- [ ] Rotate krbtgt twice (spaced by max ticket lifetime) and re-verify the attack path is closed
-- [ ] Fix the Sysmon Event ID 3/22 gap on MY-LAB-PC for full LLMNR visibility
-- [ ] Capture the full lab (VMs, network, Docker configs) as infrastructure-as-code for faster rebuilds
+- [] Automate the SharpHound → BloodHound collection pipeline end-to-end
+- [] Rotate krbtgt twice (spaced by max ticket lifetime) and re-verify the attack path is closed
+- [] Fix the Sysmon Event ID 3/22 gap on MY-LAB-PC for full LLMNR visibility
+- [] Capture the full lab (VMs, network, Docker configs) as infrastructure-as-code for faster rebuilds
 
 ---
 
-## 💡 Why I Built This
+## Why I Built This
 
 Most of my earlier lab work treated defense and offense as separate skills. This project deliberately fuses them: build the detection layer first, then attack it, so every finding is grounded in what a real SOC analyst would actually see, or not see, in Kibana.
 
@@ -251,18 +245,18 @@ The goal wasn't to run tools and get a hash; it was to trace each attack all the
 
 ---
 
-## 🔗 Related Projects
+## Related Projects
 
 | Project | Description |
 |---|---|
-| [🏢 Active Directory Homelab](../01-Active-Directory-Homelab/) | The enterprise-style AD identity and infrastructure environment this lab is built on top of |
-| [🔍 Detection-Engineering](https://github.com/joshuagodwin7929/Detection-Engineering) | The Sigma rules this lab's hunt queries became, with CI |
-| [🟣 Purple-Team-Automation](https://github.com/joshuagodwin7929/Purple-Team-Automation) | Automated Caldera attacks that validated those rules with live alerts |
-| [🛡️ AD-Attack-Defense-Lab](../) | All the labs in this repo |
+| [Active Directory Homelab](../01-Active-Directory-Homelab/) | The enterprise-style AD identity and infrastructure environment this lab is built on top of |
+| [Detection-Engineering](https://github.com/joshuagodwin7929/Detection-Engineering) | The Sigma rules this lab's hunt queries became, with CI |
+| [Purple-Team-Automation](https://github.com/joshuagodwin7929/Purple-Team-Automation) | Automated Caldera attacks that validated those rules with live alerts |
+| [AD-Attack-Defense-Lab](../) | All the labs in this repo |
 
 ---
 
-## 🛡️ Project Summary
+## Project Summary
 
 **SIEM • Active Directory • Detection Engineering • Adversary Emulation**
 

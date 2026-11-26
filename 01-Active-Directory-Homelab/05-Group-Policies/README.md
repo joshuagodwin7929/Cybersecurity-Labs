@@ -41,7 +41,7 @@ users and devices in the domain using Group Policy.
 - Blocked removable storage devices via **Computer Configuration > 
   Policies > Administrative Templates > System > Removable Storage Access**
 - **Purpose:** reduce data exfiltration risk and unauthorized software 
-  introduction via removable media — a common vector reviewed in 
+  introduction via removable media, a common vector reviewed in 
   security hardening
 - <img width="682" height="451" alt="Screenshot 2026-07-24 045457" src="https://github.com/user-attachments/assets/5f26df50-fbb9-435b-a218-0c1afa398596" />
 
@@ -58,14 +58,14 @@ users and devices in the domain using Group Policy.
 
 ## What This Demonstrates
 Hands-on application of the principle of least privilege and endpoint 
-hardening through policy enforcement — skills directly relevant to 
+hardening through policy enforcement, skills directly relevant to 
 reviewing GPO-based controls during a security assessment or incident 
 investigation.
 
 ## Notes / Lessons Learned
 
 **GPO conflict (competing settings):** Two GPOs ended up applying 
-conflicting settings to the same OU — the mapped network drive policy 
+conflicting settings to the same OU, the mapped network drive policy 
 was being overridden by another GPO linked higher in the OU hierarchy 
 with a different drive letter assignment. Since GPOs apply in a defined 
 order (Local > Site > Domain > OU, with later-applied policies winning 
@@ -75,7 +75,7 @@ enforcing the correct GPO so the intended settings actually took effect
 for the target OU.
 
 **Policy not applying immediately:** After creating and linking a new 
-GPO, the client machine wasn't reflecting the change right away — 
+GPO, the client machine wasn't reflecting the change right away, 
 Group Policy only refreshes on its own periodically (or at logon/reboot 
 by default), so waiting for a natural refresh wasn't practical for 
 testing. So, ran `gpupdate /force` on the client to trigger an immediate 
@@ -85,6 +85,6 @@ applying, in what order, and to catch cases where a setting wasn't
 being applied due to conflict or scope.
 
 This reinforced that Group Policy troubleshooting is less about the 
-individual setting and more about understanding precedence and scope — 
+individual setting and more about understanding precedence and scope, 
 `gpresult` became the go-to tool for diagnosing why an expected policy 
 wasn't taking effect.

@@ -1,6 +1,6 @@
-### Detection 2: Golden Ticket — Python-based 4769/4768 Correlation ###
+### Detection 2: Golden Ticket: Python-based 4769/4768 Correlation ###
  
-**Gap closed:** Recommendation 3 — "Add a '4769 without a preceding
+**Gap closed:** Recommendation 3, "Add a '4769 without a preceding
 4768' correlation rule as a general-purpose tripwire for
 credential-replay and forged-ticket activity."
  
@@ -16,13 +16,13 @@ built.
 #### The logic in plain English
  
 Every normal Kerberos authentication produces two events in order:
-1. **Event 4768** — TGT issued (the "master ticket" the KDC hands out at login)
-2. **Event 4769** — TGS issued (a "service ticket" granted using the TGT)
-A Golden Ticket is a **forged TGT** — the attacker created it
+1. **Event 4768**: TGT issued (the "master ticket" the KDC hands out at login)
+2. **Event 4769**: TGS issued (a "service ticket" granted using the TGT)
+A Golden Ticket is a **forged TGT**, the attacker created it
 themselves using the krbtgt hash. The KDC never issued it, so:
  
-- ❌ No 4768 — the attacker never actually logged in
-- ✅ 4769 appears — Windows sees a valid-looking ticket and serves the request
+- ❌ No 4768, the attacker never actually logged in
+- ✅ 4769 appears, Windows sees a valid-looking ticket and serves the request
 **4769 with no 4768 in the preceding 10 hours (Kerberos ticket
 lifetime) = forged ticket.**
  
@@ -56,7 +56,7 @@ now        = datetime.now(timezone.utc)
 look_back  = now - timedelta(minutes=LOOK_BACK_MINUTES)
 tgt_window = now - timedelta(hours=TGT_WINDOW_HOURS)
  
-# Step 1 — Get all 4769 events in the look-back window
+# Step 1 - Get all 4769 events in the look-back window
 resp_4769 = es.search(index=INDEX, body={
     "size": 100,
     "query": {"bool": {"must": [
@@ -77,7 +77,7 @@ for hit in resp_4769["hits"]["hits"]:
     if user.endswith("$") or user.lower() in ["","krbtgt"]:
         continue   # skip machine accounts and krbtgt itself
  
-    # Step 2 — Check for a matching 4768 within the ticket-lifetime window
+    # Step 2 - Check for a matching 4768 within the ticket-lifetime window
     resp_4768 = es.search(index=INDEX, body={
         "size": 1,
         "query": {"bool": {"must": [
@@ -88,10 +88,10 @@ for hit in resp_4769["hits"]["hits"]:
     })
  
     if resp_4768["hits"]["total"]["value"] == 0:
-        print(f"[!] ALERT: 4769 with no 4768 — User: {user} | "
+        print(f"[!] ALERT: 4769 with no 4768 - User: {user} | "
               f"Service: {service} | Host: {host} | Time: {ts}")
  
-        # Step 3 — Write alert document to Elasticsearch
+        # Step 3 - Write alert document to Elasticsearch
         es.index(index=ALERT_INDEX, body={
             "@timestamp":        now.isoformat(),
             "alert.type":        "golden_ticket_suspected",
@@ -109,7 +109,7 @@ for hit in resp_4769["hits"]["hits"]:
 **Deployment notes:**
  
 The script runs inside a lightweight Docker container on the elk-net
-Docker network — this is required because the Elasticsearch container
+Docker network, this is required because the Elasticsearch container
 uses TLS with an internal CA, and the cert is only valid for the
 hostname `elasticsearch` (resolvable only inside the Docker network,
 not from the Ubuntu host directly). The container approach avoids
@@ -163,7 +163,7 @@ The forged ticket authenticated to the DC and generated a 4769 for
  
 ```
 [*] Found 1 4769 events in the last 10 minutes
-[!] ALERT: 4769 with no 4768 — User: Administrator@JOSHUA.LOCAL |
+[!] ALERT: 4769 with no 4768 - User: Administrator@JOSHUA.LOCAL |
     Service: JOSHUA-SERVER20$ | Host: Joshua-Server2022.Joshua.local |
     Time: 2026-09-08T01:27:04.287Z
 [+] Alert written to alerts-golden-ticket index ✅
@@ -177,18 +177,18 @@ The forged ticket authenticated to the DC and generated a 4769 for
  
 Normal interactive domain logon (j.jenkins logging into MY-LAB-PC) was
 verified to produce a 4768 before 4769, the script correctly output
-`[ok] j.jenkins has a valid 4768 — legitimate ticket` with no alert
+`[ok] j.jenkins has a valid 4768, legitimate ticket` with no alert
 written. No false positives generated on normal Kerberos activity.
  
 #### False-positive considerations
  
-- **Machine accounts** (ending in `$`) are explicitly excluded — DCs
+- **Machine accounts** (ending in `$`) are explicitly excluded, DCs
   and member computers generate 4769s during normal background
   operations with no user-initiated 4768.
 - **krbtgt itself** is excluded for the same reason.
 - **Accounts with tickets from before the look-back window** could
   theoretically appear as false positives if the 4768 is older than 10
-  hours — acceptable in this homelab context; a production deployment
+  hours, acceptable in this homelab context; a production deployment
   would adjust `TGT_WINDOW_HOURS` to match the environment's actual
   Kerberos ticket lifetime policy.
 ---
@@ -202,6 +202,6 @@ written. No false positives generated on normal Kerberos activity.
  
 The two gaps that made DCSync and Golden Ticket "invisible" in the
 original lab run are now instrumented. Both detections write evidence to
-Elasticsearch — the DCSync rule via Kibana alerting, the Golden Ticket
-via a custom Python script writing to `alerts-golden-ticket` index —
+Elasticsearch, the DCSync rule via Kibana alerting, the Golden Ticket
+via a custom Python script writing to `alerts-golden-ticket` index,
 giving a future SOC analyst a query target for both.

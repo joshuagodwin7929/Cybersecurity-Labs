@@ -1,4 +1,4 @@
-# Home SOC Lab — Phase 0: Visibility Foundation
+# Home SOC Lab: Phase 0: Visibility Foundation
  
 A personal SIEM/detection lab built around a small Active Directory environment (Domain Controller + Windows 10 endpoint) feeding into an ELK stack (Elasticsearch, Logstash, Kibana). This repo documents **Phase 0**, the visibility foundation that every later phase (attack simulation, detection engineering) depends on.
  
@@ -6,10 +6,10 @@ A personal SIEM/detection lab built around a small Active Directory environment 
  
 ## Lab Architecture
  
-- **Domain Controller** — Windows Server 2022, domain-joined AD environment
-- **Endpoint** — Windows 10, domain-joined
-- **SIEM backend** — Elastic Stack (Elasticsearch, Kibana) via Docker Compose on Ubuntu 22.04
-- **Log shipper** — Winlogbeat on both Windows hosts
+- **Domain Controller**: Windows Server 2022, domain-joined AD environment
+- **Endpoint**: Windows 10, domain-joined
+- **SIEM backend**: Elastic Stack (Elasticsearch, Kibana) via Docker Compose on Ubuntu 22.04
+- **Log shipper**: Winlogbeat on both Windows hosts
 
 ## Phase 0 Objectives
  
@@ -22,7 +22,7 @@ A personal SIEM/detection lab built around a small Active Directory environment 
  
 ## 1. Sysmon Deployment
  
-Installed on both the DC and the Windows 10 endpoint using [SwiftOnSecurity's sysmon-config](https://github.com/SwiftOnSecurity/sysmon-config) — a well-documented, single-file baseline that balances signal (attacker-relevant behavior) against noise (routine Windows/background activity).
+Installed on both the DC and the Windows 10 endpoint using [SwiftOnSecurity's sysmon-config](https://github.com/SwiftOnSecurity/sysmon-config), a well-documented, single-file baseline that balances signal (attacker-relevant behavior) against noise (routine Windows/background activity).
  
 ```powershell
 .\Sysmon64.exe -accepteula -i sysmonconfig-export.xml
@@ -40,8 +40,8 @@ Get-Service Sysmon64
  
 Enabled via **Computer Configuration > Administrative Templates > Windows Components > Windows PowerShell**:
  
-- **Turn on Module Logging** — Module Names: `*`
-- **Turn on PowerShell Script Block Logging** — Enabled
+- **Turn on Module Logging**: Module Names: `*`
+- **Turn on PowerShell Script Block Logging**: Enabled
 Validated by generating PowerShell activity and confirming Event IDs **4103** (pipeline execution) and **4104** (script block text) in `Microsoft-Windows-PowerShell/Operational`.
 
 <img width="509" height="361" alt="Event ID 4103" src="https://github.com/user-attachments/assets/66a6b06c-ef90-4c9b-881c-ed2598c51039" />
@@ -67,11 +67,11 @@ Configured under **Computer Configuration > Windows Settings > Security Settings
 <img width="589" height="402" alt="All Audit Policy" src="https://github.com/user-attachments/assets/2d3cd735-8d7c-4a9a-8894-e2bcff598e30" />
 
  
-Also enabled: **"Audit: Force audit policy subcategory settings to override audit policy category settings"** under Security Options — required so legacy policy doesn't silently override the advanced settings above.
+Also enabled: **"Audit: Force audit policy subcategory settings to override audit policy category settings"** under Security Options, required so legacy policy doesn't silently override the advanced settings above.
  
 ### File Share Auditing (SACL)
  
-A SACL was applied directly to a departmental share (on its local folder path, not the mapped drive — remote/mapped-drive auditing changes are blocked by Windows unless done locally) auditing:
+A SACL was applied directly to a departmental share (on its local folder path, not the mapped drive, remote/mapped-drive auditing changes are blocked by Windows unless done locally) auditing:
 - Create files / write data
 - Create folders / append data
 - Delete / Delete subfolders and files
@@ -88,7 +88,7 @@ Validated by creating/deleting a test file and confirming **Event ID 4663** in t
 
 
  
-## 4. Log Shipping — Winlogbeat → Elasticsearch
+## 4. Log Shipping: Winlogbeat → Elasticsearch
  
 Winlogbeat (matched to the Elastic Stack version in use) installed on both hosts, configured to ship:
  
@@ -116,7 +116,7 @@ output.elasticsearch:
   password: "<redacted>"
 ```
  
-> **Note:** Elastic Stack 8.x enables TLS on Elasticsearch by default with a self-signed certificate. `ssl.verification_mode: none` is acceptable for an isolated home lab — not recommended for production without proper CA-signed certs.
+> **Note:** Elastic Stack 8.x enables TLS on Elasticsearch by default with a self-signed certificate. `ssl.verification_mode: none` is acceptable for an isolated home lab, not recommended for production without proper CA-signed certs.
  
 Installed and started as a Windows service:
 ```powershell
@@ -141,7 +141,7 @@ event.code:4624
 ![PowerShell 4103/4104 events in Event Viewer](https://github.com/user-attachments/assets/66a6b06c-ef90-4c9b-881c-ed2598c51039)
 *Script Block Logging (4104) and Module Logging (4103) confirmed in the PowerShell Operational log.*
  
-### Advanced Audit Policy — GPO Configuration
+### Advanced Audit Policy: GPO Configuration
 ![Advanced Audit Policy categories configured in Group Policy Management Editor](https://github.com/user-attachments/assets/2d3cd735-8d7c-4a9a-8894-e2bcff598e30)
 *Logon/Logoff, Kerberos, Account Management, and Object Access categories enabled.*
  
@@ -153,16 +153,16 @@ event.code:4624
 ![Kibana Discover showing live winlogbeat-* data](https://github.com/user-attachments/assets/bcaa0dd5-2381-40ff-96ec-e60a8c8a93e7)
 *Live Sysmon and Security events flowing from both hosts into the winlogbeat-* index.*
  
-### Final Validation — Event ID 4624
+### Final Validation: Event ID 4624
 ![Kibana search for event.code:4624 returning a logon event](https://github.com/user-attachments/assets/96c1d42e-d119-4c5c-8435-e89728939b9f)
-*A normal user logon, fully searchable — meeting Phase 0's exit criteria.*
+*A normal user logon, fully searchable, meeting Phase 0's exit criteria.*
  
 ## Lessons Learned
  
-- Event Viewer's "Access is denied" errors are almost always a UAC token/elevation issue, not a real permissions gap — running as Administrator explicitly resolves most of them.
-- SACLs on a mapped network drive (`Y:\`) will trigger a "remote setting" warning that strips inherited entries — set them on the actual local folder path on the file server instead.
+- Event Viewer's "Access is denied" errors are almost always a UAC token/elevation issue, not a real permissions gap, running as Administrator explicitly resolves most of them.
+- SACLs on a mapped network drive (`Y:\`) will trigger a "remote setting" warning that strips inherited entries, set them on the actual local folder path on the file server instead.
 - YAML is whitespace- and comment-position-sensitive. A `#` at the end of a line does nothing; it must be the very first character to comment out a line.
-- Elastic Stack 8.x defaults to TLS-enabled Elasticsearch — plan for `https://` and either proper certs or `ssl.verification_mode: none` in a lab context.
+- Elastic Stack 8.x defaults to TLS-enabled Elasticsearch, plan for `https://` and either proper certs or `ssl.verification_mode: none` in a lab context.
 ## Next Steps
  
 With visibility now established, the next phases move into controlled attack simulation and building/validating detections against the telemetry captured here.
