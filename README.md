@@ -32,11 +32,11 @@ My rule for all of it: **log first, attack second, hunt third, then formalize.**
 The hunt queries from Phase 5 didn't stop here:
 
 - **[Detection-Engineering](https://github.com/joshuagodwin7929/Detection-Engineering):** they became Sigma rules, compiled to Elastic with a CI check on every push.
-- **[Purple-Team-Automation](https://github.com/joshuagodwin7929/Purple-Team-Automation):** I ran the attacks again through MITRE Caldera and validated each rule with a live Kibana alert. That re-test also caught a bug in my Phase 5B DCSync rule, which is now corrected [here](03-Active-Directory-ELK-SIEM-Lab/Phase-5-Detection-Engineering/5B-Closing-The-Detection-Gaps/Gap-1-DCSync-No-Audit-Trail/README.md#correction-november-2026).
+- **[Purple-Team-Automation](https://github.com/joshuagodwin7929/Purple-Team-Automation):** I ran the attacks again through MITRE Caldera and validated each rule with a live Kibana alert. That re-test also caught a bug in my Phase 5B DCSync rule, which is now corrected [here](03-Active-Directory-ELK-SIEM-Lab/Phase-5-Detection-Engineering/5B-Closing-The-Detection-Gaps/Gap-1-DCSync-No-Audit-Trail/README.md#the-correction-november-2026).
 
-## How each write-up is organised
+## How each write-up reads
 
-Most phases answer the same questions: what I built, why, which technologies, how, which security concepts it shows, what I learned, what I'd improve, and what evidence I have.
+Each phase is written as notes from doing the work: what I did and in what order, what went wrong, what I'd change, and the screenshots that back it up. The facts and evidence come first, not a polished narrative.
 
 ## Repo layout
 

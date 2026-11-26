@@ -1,47 +1,19 @@
-# File Server & Department Shares
+# File Server and Department Shares
 
 Part of the [Active Directory Homelab](../) series.
 
-## Objective
-Stand up a file server with department-based shares, secured with 
-appropriate NTFS and share permissions, so each department can only 
-access its own data.
+I set up a file server with one share per department, locked down so each department can only reach its own data.
 
-## What I Configured
-- Installed the File and Storage Services role on [Joshua-Server2022]
-- Created 5 department shares:
-- **Sales**
-- **HR**,
-- **IT**
-- **Management**
-- **Accounting**
-- Configured NTFS permissions scoped to each department's security group 
-  (created from the OU structure in [02-users-and-ous](../02-Users-And-OUs))
-- Configured share-level permissions to complement NTFS permissions 
-  (principle of least privilege, only the relevant department group 
-  gets Modify/Read access)
-- Tested access as different department users to confirm isolation 
-  (e.g. HR user cannot browse the Finance share)
+I installed the File and Storage Services role on `Joshua-Server2022` and created five department shares: Sales, HR, IT, Management and Accounting. For each one I scoped the NTFS permissions to that department's security group (the groups come from the OU structure in [02-Users-And-OUs](../02-Users-And-OUs)), then set share-level permissions to match, so only the relevant group gets Modify/Read rather than leaving anything at "Everyone: Full Control."
+
+Then I logged in as users from different departments to confirm the isolation held, for example that an HR user can't browse the Finance share.
 
 ## Screenshots
-- <img width="584" height="406" alt="Share file department" src="https://github.com/user-attachments/assets/7781028d-3195-47f0-bf4c-ac06fa2f758b" />
-- <img width="572" height="395" alt="File Share Permission" src="https://github.com/user-attachments/assets/e37fa425-f153-4c6b-a090-374ae222a630" />
-- <img width="508" height="356" alt="Access Test" src="https://github.com/user-attachments/assets/1159cbe0-1ac9-4556-8d76-20521ec31098" />
 
+<img width="584" height="406" alt="Share file department" src="https://github.com/user-attachments/assets/7781028d-3195-47f0-bf4c-ac06fa2f758b" />
+<img width="572" height="395" alt="File Share Permission" src="https://github.com/user-attachments/assets/e37fa425-f153-4c6b-a090-374ae222a630" />
+<img width="508" height="356" alt="Access Test" src="https://github.com/user-attachments/assets/1159cbe0-1ac9-4556-8d76-20521ec31098" />
 
+## Notes
 
-## What This Demonstrates
-Practical application of access control principles, ensuring data is 
-only accessible to authorized groups, which is a core control reviewed 
-during access audits and a key concept in preventing lateral movement 
-during a security incident.
-
-## Notes / Lessons Learned
-
-No major permission conflicts here, applying the principle of least 
-privilege from the start (scoping NTFS permissions to each department's 
-security group, then matching share permissions rather than leaving 
-them at "Everyone: Full Control") avoided the most common cause of 
-access issues on file servers. Testing access as different department 
-users early on confirmed isolation was working correctly before moving 
-on, rather than discovering a misconfiguration later.
+There were no permission conflicts to untangle here, and I think that's because I scoped least privilege from the start: NTFS permissions tied to each department's group, share permissions matched to them, nothing left wide open. Testing access as different users early confirmed the isolation was working before I moved on, instead of finding a misconfiguration later. Access control like this is a core control during access audits, and keeping departments separated is one of the things that limits how far an attacker can move sideways during an incident.
